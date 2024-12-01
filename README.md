@@ -6,6 +6,13 @@ This monitors an engine, mostly temperatures and fuel, emitting suitable N2K mes
 
 Single board. If using a 328p chip you will need to flash the bootloader. See programBootLoader for details. 
 
+## Changes from original
+
+* All components SMD, no draughtboards or modules with pin headers to fail.
+* Switched from a LM385 to a LMV393 for the flywheel pulse generator as all I need is a clean square wave to count the pulses. (actually I miss ordered 10 LMV393's and then switched over).
+* Changed to a 16MHz crystal on the MCP2515 since this is what the 328p is using. Perhaps 1 crystal would work for both, but probably not.
+
+
 # Todo
 
 * [x] build board.
