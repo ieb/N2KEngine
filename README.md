@@ -13,11 +13,23 @@ Single board. If using a 328p chip you will need to flash the bootloader. See pr
 * Changed to a 16MHz crystal on the MCP2515 since this is what the 328p is using. Perhaps 1 crystal would work for both, but probably not.
 
 
+# Memory usage
+
+    RAM:   [===       ]  25.5% (used 522 bytes from 2048 bytes)
+    Flash: [======    ]  60.6% (used 19560 bytes from 32256 bytes)
+
+NB, no malloc in use in code.
+
+
+
 # Todo
 
 * [x] build board.
 * [x] Flash bootloader and test
-* [ ] Port code from original
+* [x] Port code from original
+* [x] Allow for 16MHz MCP2515 oscillator, current library uses 8MHz.
+* [x] Handle when engine not running, now that device is powered from CanBus
+* [ ] PR SmallNMEA2000 with changes
 * [ ] Test and Calibrate NTCs
 * [ ] Test and Calibrate Coolant and fuel
 * [ ] Test On N2K Bus
