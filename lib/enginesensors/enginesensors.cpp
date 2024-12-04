@@ -1,6 +1,7 @@
 #include "enginesensors.h"
 #include <util/crc16.h>
 #include <EEPROM.h>
+#include <SmallNMEA2000.h>
 
 #ifdef DEBUGON
 #define DEBUG(x) Serial.print(x)
@@ -33,8 +34,8 @@ void flywheelPuseHandler() {
 bool EngineSensors::begin() {
   loadEngineHours();
   // PULLUP is required with the LMV393 which is open collector.
-  pinMode(PINS_FLYWHEEL, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(PINS_FLYWHEEL), flywheelPuseHandler, FALLING);
+  pinMode(flywheelPin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(flywheelPin), flywheelPuseHandler, FALLING);
   DEBUG(F("ISR enabled"));
   return true;
 }
@@ -44,22 +45,6 @@ void EngineSensors::read() {
   if ( now-lastFlywheelReadTime > flywheelReadPeriod) {
     lastFlywheelReadTime = now;
     readEngineRPM();
-  }
-  if ( now-lastFuelReadTime > fuelReadPeriod ) {
-    lastFuelReadTime = now;
-    readFuelLevel();
-  }
-  if ( now -lastCoolantReadTime > coolantReadPeriod ) {
-    lastCoolantReadTime = now;
-    readCoolant();
-  }
-  if ( now-lastVotageRead > voltageReadPeriod ) {
-    lastVotageRead = now;
-    readVoltages();
-  }
-  if ( now-lastNTCRead > NTCReadPeriod ) {
-    lastNTCRead = now;
-    readNTC();
   }
   saveEngineHours();
 }
@@ -82,6 +67,10 @@ void EngineSensors::loadEngineHours() {
   Serial.print(F("Hours: "));
   Serial.println(0.004166666667*engineHours.engineHoursPeriods);
 }
+
+bool EngineSensors::isEngineRunning() { 
+  return engineRunning; 
+};
 
 
 void EngineSensors::saveEngineHours() {
@@ -132,13 +121,28 @@ void EngineSensors::readEngineRPM() {
   }
 }
 
+double EngineSensors::getEngineRPM() {
+  return engineRPM;
+}
 
+
+
+double EngineSensors::getEngineSeconds() {  
+  return 15L*engineHours.engineHoursPeriods; 
+};
+       
+
+
+double EngineSensors::getFuelCapacity() {
+  return FUEL_CAPACITY;
+}
+ 
 // Fuel sensor goes 0-190, 0 being full, 190 being empty.
 // tested ok.
-void EngineSensors::readFuelLevel() {
+double EngineSensors::getFuelLevel(uint8_t adc) { 
     // probably need a long to do this calc
     INFO(F("Fuel:"));
-    int16_t fuelReading = analogRead(ADC_FUEL_SENSOR);
+    int16_t fuelReading = analogRead(adc);
     INFO(fuelReading);
     INFO(",");
     // Rtop = 1000
@@ -151,49 +155,12 @@ void EngineSensors::readFuelLevel() {
     fuelReading  = 100-(100*(ADC_READING_EMPTY-fuelReading))/(ADC_READING_EMPTY);
     // the restances may be out of spec so deal with > 100 or < 0.
     if (fuelReading > 100 ) {
-      fuelLevel = 100;
+      return 100.0;
     } else if ( fuelReading < 0) {
-      fuelLevel = 0;
-    } else {
-      fuelLevel = fuelReading;
-    }
+      return 0.0;
+    } 
     INFOLN(fuelLevel);
-}
-
-/**
- *  convert a reading from a ntc into a temperature using a curve.
- */ 
-// tested ok 20210909
-int16_t EngineSensors::interpolate(
-      int16_t reading, 
-      int16_t minCurveValue, 
-      int16_t maxCurveValue,
-      int step, 
-      const int16_t *curve, 
-      int curveLength
-      ) {
-  int16_t cvp = ((int16_t)pgm_read_dword(&curve[0]));
-  if ( reading > cvp ) {
-    DEBUG(minCurveValue);
-    DEBUG(",");
-    return minCurveValue;
-  }
-  for (int i = 1; i < curveLength; i++) {
-    int16_t cv = ((int16_t)pgm_read_dword(&curve[i]));
-    if ( reading > cv ) {
-      DEBUG(i);
-      DEBUG(",");
-      DEBUG(curve[i]);
-      DEBUG(",");
-      DEBUG(curve[i-1]);
-      DEBUG(",");
-      return minCurveValue+((i-1)*step)+((cvp-reading)*step)/(cvp-cv);
-    }
-    cvp = cv;
-  }
-  DEBUG(minCurveValue);
-  DEBUG("^,");
-  return maxCurveValue;
+    return (double)fuelReading;
 }
 
 
@@ -261,12 +228,12 @@ const int16_t coolantTable[] PROGMEM= {
 
 
 
-void EngineSensors::readCoolant() {
+double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t batteryAdc) {
   // probably need a long to do this calc
     // need 32 bits, 1024*1024 = 1M
     DEBUG(F("Coolant:"));
-    int32_t coolantSupply = (int32_t) analogRead(ADC_ENGINEBATTERY);
-    int32_t coolantReading = (int32_t)analogRead(ADC_COOLANT);
+    int32_t coolantSupply = (int32_t) analogRead(batteryAdc);
+    int32_t coolantReading = (int32_t)analogRead(coolantAdc);
 
 //    // fake up 12v supply to testing purposes
 //    coolantSupply = COOLANT_SUPPLY_ADC_12V;
@@ -275,8 +242,7 @@ void EngineSensors::readCoolant() {
     
     if ( coolantSupply < MIN_SUPPLY_VOLTAGE) {
       DEBUGLN(F("no power"));
-      coolantTemperature = 0;
-      return;
+      return SNMEA2000::n2kDoubleNA;
     }
     DEBUG(coolantSupply);
     DEBUG(",");
@@ -285,21 +251,22 @@ void EngineSensors::readCoolant() {
     coolantReading = (coolantReading * COOLANT_SUPPLY_ADC_12V)/coolantSupply;
     DEBUG(coolantReading);
     DEBUG(",");
-    coolantTemperature = interpolate(coolantReading,COOLANT_MIN_TEMPERATURE, COOLANT_MAX_TEMPERATURE, COOLANT_STEP, coolantTable, COOLANT_TABLE_LENGTH);
+    int16_t coolantTemperature = interpolate(coolantReading,COOLANT_MIN_TEMPERATURE, COOLANT_MAX_TEMPERATURE, COOLANT_STEP, coolantTable, COOLANT_TABLE_LENGTH);
     DEBUG("CCC");DEBUGLN(coolantTemperature);
+    return ((double)coolantTemperature)+273.15; 
+
 }
 
+double EngineSensors::getVoltage(uint8_t adc) { 
+  double voltage = VOLTAGE_SCALE*analogRead(adc);
+  DEBUG(F(" Adc:"));
+  DEBUG(adc);
+  DEBUG(F(" V:"));
+  DEBUGLN(voltage);
+  return voltage; 
+};
 
-// tested ok and calibrated.
-void EngineSensors::readVoltages() {
-  // probably need a long to do this calc
-    alternatorBVoltage = VOLTAGE_SCALE*analogRead(ADC_ALTERNATOR_VOLTAGE);
-    DEBUG(F("Alternator B Voltage:"));
-    DEBUGLN(alternatorBVoltage);
-    engineBatteryVoltage = VOLTAGE_SCALE*analogRead(ADC_ENGINEBATTERY);
-    DEBUG(F("Engine Battery Voltage:"));
-    DEBUGLN(engineBatteryVoltage);
-}
+
 
 /*
 https://docs.google.com/spreadsheets/d/1cH6MjYFLKQYQMPswFqU3-U8cdn9rH_bujdkhxfRw2cY/edit#gid=1843834819
@@ -391,28 +358,60 @@ const int16_t tcurveNMF5210K[] PROGMEM= {
 #define DISCONNECTED_NTC 1000
 
 
-
 // tested ok 20210909
-void EngineSensors::readNTC() {
+double EngineSensors::getTemperatureK(uint8_t adc) {
   // probably need a long to do this calc
-    DEBUGLN(F("Temp"));
-    for (int i = 0; i < N_NTC; i++) {
+  DEBUGLN(F("Temp"));
+  int ntcReading = analogRead(adc);
+  if ( ntcReading > DISCONNECTED_NTC ) {
+    DEBUGLN("disconnected");
+    return SNMEA2000::n2kDoubleNA;
+  } 
+  DEBUG(ntcReading);
+  DEBUG(",");
+  DEBUG(5.0*ntcReading/1024.0);
+  DEBUG(",");
+  int16_t temperature = interpolate(ntcReading, NMF5210K_MIN, NMF5210K_MAX, NMF5210K_STEP, tcurveNMF5210K, NMF5210K_LENGTH);
+  DEBUGLN(temperature);
+  return (0.1*temperature)+273.15;
+}
+
+
+/**
+ *  convert a reading from a ntc into a temperature using a curve.
+ */ 
+// tested ok 20210909
+int16_t EngineSensors::interpolate(
+      int16_t reading, 
+      int16_t minCurveValue, 
+      int16_t maxCurveValue,
+      int step, 
+      const int16_t *curve, 
+      int curveLength
+      ) {
+  int16_t cvp = ((int16_t)pgm_read_dword(&curve[0]));
+  if ( reading > cvp ) {
+    DEBUG(minCurveValue);
+    DEBUG(",");
+    return minCurveValue;
+  }
+  for (int i = 1; i < curveLength; i++) {
+    int16_t cv = ((int16_t)pgm_read_dword(&curve[i]));
+    if ( reading > cv ) {
       DEBUG(i);
       DEBUG(",");
-      int ntcReading = analogRead(i+START_NTC);
-      if ( ntcReading > DISCONNECTED_NTC ) {
-        DEBUGLN("disconnected");
-        temperature[i] = 0;
-      } else {
-        DEBUG(ntcReading);
-        DEBUG(",");
-        DEBUG(5.0*ntcReading/1024.0);
-        DEBUG(",");
-        temperature[i] = interpolate(ntcReading, NMF5210K_MIN, NMF5210K_MAX, NMF5210K_STEP, tcurveNMF5210K, NMF5210K_LENGTH);
-        DEBUGLN(temperature[i]);
-
-      }
+      DEBUG(curve[i]);
+      DEBUG(",");
+      DEBUG(curve[i-1]);
+      DEBUG(",");
+      return minCurveValue+((i-1)*step)+((cvp-reading)*step)/(cvp-cv);
     }
+    cvp = cv;
+  }
+  DEBUG(minCurveValue);
+  DEBUG("^,");
+  return maxCurveValue;
 }
+
 
 

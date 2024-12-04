@@ -6,40 +6,11 @@
 
 // read frequencies
 #define DEFAULT_FLYWHEEL_READ_PERIOD 2000
-#define DEFAULT_FUEL_READ_PERIOD 10000
-#define DEFAULT_COOLANT_READ_PERIOD 1000
-#define DEFAULT_VOLTAGE_READ_PERIOD 1000
-#define DEFAULT_NTC_READ_PERIOD 2000
-
 
 // Engine hours resolution
 #define ENGINE_HOURS_PERIOD_MS 15000
 
 
-// ADC assignments
-#define ADC_ALTERNATOR_VOLTAGE 0
-#define ADC_FUEL_SENSOR 1
-#define ADC_NTC1 2
-#define ADC_NTC2 3
-#define ADC_NTC3 4
-#define ADC_NTC4 5
-#define ADC_COOLANT 6
-#define ADC_ENGINEBATTERY 7
-
-
-// Digital pin assignments
-// Flywheel pulse pin
-#define PINS_FLYWHEEL 2
-#define ONE_WIRE 3 // not used 
-
-
-// NTC numbering
-#define EXHAUST_TEMP 0
-#define ALTERNATOR_TEMP 1
-#define ENGINEROOM_TEMP 2
-#define A2B_TEMP 3
-#define START_NTC 2
-#define N_NTC 4
 
 
 // stored as voltage
@@ -96,39 +67,26 @@ union CRCStorage {
 class EngineSensors {
     public:
 
-       EngineSensors(unsigned long flywheelReadPeriod=DEFAULT_FLYWHEEL_READ_PERIOD, 
-                    unsigned long fuelReadPeriod=DEFAULT_FUEL_READ_PERIOD, 
-                    unsigned long coolantReadPeriod=DEFAULT_COOLANT_READ_PERIOD, 
-                    unsigned long voltageReadPeriod=DEFAULT_VOLTAGE_READ_PERIOD, 
-                    unsigned long NTCReadPeriod=DEFAULT_NTC_READ_PERIOD):
-                     flywheelReadPeriod{flywheelReadPeriod},
-                     fuelReadPeriod{fuelReadPeriod},
-                     coolantReadPeriod{coolantReadPeriod},
-                     voltageReadPeriod{voltageReadPeriod},
-                     NTCReadPeriod{NTCReadPeriod} {};
+       EngineSensors(uint8_t flywheelPin=2, unsigned long flywheelReadPeriod=DEFAULT_FLYWHEEL_READ_PERIOD
+                        ):
+                     flywheelPin{flywheelPin},
+                     flywheelReadPeriod{flywheelReadPeriod}
+                     {};
        bool begin();
        void read();
-       bool isEngineRunning() { return engineRunning; };
+       bool isEngineRunning();
        void saveEngineHours();
-       double getEngineRPM() { return engineRPM; };
-       double getEngineSeconds() {  return 15L*engineHours.engineHoursPeriods; };
-       double getCoolantTemperatureK() { return coolantTemperature+273.15; };
-       double getEngineRoomTemperatureK() { return 0.1*temperature[ENGINEROOM_TEMP]+273.15; };
-       double getAlternatorTemperatureK() { return 0.1*temperature[ALTERNATOR_TEMP]+273.15; };  
-       double getExhaustTemperatureK() { return 0.1*temperature[EXHAUST_TEMP]+273.15; };  
-       
+       double getEngineRPM();
 
-       double getAlternatorVoltage() { return alternatorBVoltage; };
-       double getEngineBatteryVoltage() { return engineBatteryVoltage; };
-       double getFuelLevel() { return fuelLevel; }
-       double getFuelCapacity() { return FUEL_CAPACITY; }
+       double getEngineSeconds();
+       double getFuelLevel(uint8_t adc);
+       double getFuelCapacity();
+       double getCoolantTemperatureK(uint8_t coolantAdc, uint8_t batteryAdc);
+       double getTemperatureK(uint8_t adc);
+       double getVoltage(uint8_t adc);
 
     private:
         void loadEngineHours();
-        void readNTC();
-        void readVoltages();
-        void readCoolant();
-        void readFuelLevel();
         void readEngineRPM();
 
         int16_t interpolate(
@@ -140,27 +98,15 @@ class EngineSensors {
             int curveLength
             );
       
+        uint8_t flywheelPin = 2;
+        unsigned long flywheelReadPeriod = DEFAULT_FLYWHEEL_READ_PERIOD;
         EngineHoursStorage engineHours;
         double engineRPM = 0;
         bool engineRunning = false;
-        int fuelLevel = 0; // %
-        int coolantTemperature = 0; // C in degrees, not interested in 0.1 of a degree.
-        double engineBatteryVoltage = 0; // in V
-        double alternatorBVoltage = 0; // in V
-        int16_t temperature[N_NTC]; // degrees Cx10
 
 
         unsigned long lastFlywheelReadTime = 0;
-        unsigned long lastFuelReadTime = 0;
-        unsigned long lastCoolantReadTime = 0;
-        unsigned long lastVotageRead = 0;
-        unsigned long lastNTCRead = 0;
         unsigned long lastEngineHoursTick = 0; 
-        unsigned long flywheelReadPeriod = DEFAULT_FLYWHEEL_READ_PERIOD;
-        unsigned long fuelReadPeriod = DEFAULT_FUEL_READ_PERIOD;
-        unsigned long coolantReadPeriod = DEFAULT_COOLANT_READ_PERIOD;
-        unsigned long voltageReadPeriod = DEFAULT_VOLTAGE_READ_PERIOD;
-        unsigned long NTCReadPeriod = DEFAULT_NTC_READ_PERIOD;
 };
 
 #endif

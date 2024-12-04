@@ -29,7 +29,8 @@ NB, no malloc in use in code.
 * [x] Port code from original
 * [x] Allow for 16MHz MCP2515 oscillator, current library uses 8MHz.
 * [x] Handle when engine not running, now that device is powered from CanBus
-* [ ] PR SmallNMEA2000 with changes
+* [x] Reduce memory requiments in EngineSensorts and bind measurements to messages.
+* [x] PR SmallNMEA2000 with changes
 * [ ] Test and Calibrate NTCs
 * [ ] Test and Calibrate Coolant and fuel
 * [ ] Test On N2K Bus

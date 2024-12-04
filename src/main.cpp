@@ -18,6 +18,26 @@
 #define FUEL_LEVEL_INSTANCE 0
 #define FUEL_TYPE 0   // diesel
 
+
+// ADC assignments
+#define ADC_ALTERNATOR_VOLTAGE 0
+#define ADC_FUEL_SENSOR 1
+#define ADC_EXHAUST_NTC1 2 // NTC1
+#define ADC_ALTERNATOR_NTC2 3 // NTC2
+#define ADC_ENGINEROOM_NTC3 4
+#define ADC_A2B_NTC4 5
+#define ADC_COOLANT_TEMPERATURE 6
+#define ADC_ENGINEBATTERY 7
+
+
+
+// Digital pin assignments
+// Flywheel pulse pin
+#define PIN_FLYWHEEL 2
+#define PIN_ONE_WIRE 3 // not used at present
+
+
+
 const SNMEA2000ProductInfo productInfomation PROGMEM={
                                        1300,                        // N2kVersion
                                        44,                         // Manufacturer's product code
@@ -65,11 +85,7 @@ EngineMonitor engineMonitor = EngineMonitor(DEVICE_ADDRESS,
   &rxPGN[0],
   SNMEA_SPI_CS_PIN);
 
-EngineSensors sensors(DEFAULT_FLYWHEEL_READ_PERIOD,
-  DEFAULT_FUEL_READ_PERIOD,
-  DEFAULT_COOLANT_READ_PERIOD,
-  DEFAULT_VOLTAGE_READ_PERIOD,
-  DEFAULT_NTC_READ_PERIOD);
+EngineSensors sensors(PIN_FLYWHEEL);
 
 /**
  * Send engine rapid updates while the engine is running.
@@ -97,12 +113,12 @@ void sendEngineData() {
       lastEngineUpdate = now;
       engineMonitor.sendEngineDynamicParamMessage(ENGINE_INSTANCE,
           sensors.getEngineSeconds(),
-          sensors.getCoolantTemperatureK(),
-          sensors.getAlternatorVoltage(),
+          sensors.getCoolantTemperatureK(ADC_COOLANT_TEMPERATURE, ADC_ENGINEBATTERY),
+          sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE),
           0, // status1
           0, // status2
           SNMEA2000::n2kDoubleNA, // engineOilPressure
-          sensors.getAlternatorTemperatureK() // alterator temperature as nengineOil temperature
+          sensors.getTemperatureK(ADC_ALTERNATOR_NTC2) // alterator temperature as nengineOil temperature
           );
     }
   }
@@ -120,10 +136,10 @@ void sendVoltages() {
     // because the engine monitor is not on all the time, the sid and instance ids of these messages has been shifted
     // to make space for sensors that are on all the time, and would be used by default
     // engineMonitor.sendDCBatterStatusMessage(SERVICE_BATTERY_INSTANCE, sid, sensors.getServiceBatteryVoltage());
-    engineMonitor.sendDCBatterStatusMessage(ENGINE_BATTERY_INSTANCE, sid, sensors.getEngineBatteryVoltage());
+    engineMonitor.sendDCBatterStatusMessage(ENGINE_BATTERY_INSTANCE, sid, sensors.getVoltage(ADC_ENGINEBATTERY));
     engineMonitor.sendDCBatterStatusMessage(ALTERNATOR_BATTERY_INSTANCE, sid, 
-        sensors.getAlternatorVoltage(),
-        sensors.getAlternatorTemperatureK()
+        sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE),
+        sensors.getTemperatureK(ADC_ALTERNATOR_NTC2)
         );
     sid++;
   }
@@ -137,7 +153,7 @@ void sendFuel() {
   unsigned long now = millis();
   if ( now-lastFuelUpdate > FUEL_UPDATE_PERIOD ) {
     lastFuelUpdate = now;
-    engineMonitor.sendFluidLevelMessage(FUEL_TYPE, FUEL_LEVEL_INSTANCE, sensors.getFuelLevel(), sensors.getFuelCapacity());
+    engineMonitor.sendFluidLevelMessage(FUEL_TYPE, FUEL_LEVEL_INSTANCE, sensors.getFuelLevel(ADC_FUEL_SENSOR), sensors.getFuelCapacity());
 
   }
 }
@@ -151,9 +167,9 @@ void sendTemperatures() {
   unsigned long now = millis();
   if ( now-lastTempUpdate > TEMPERATURE_UPDATE_PERIOD ) {
     lastTempUpdate = now;
-    engineMonitor.sendTemperatureMessage(sid, 0, 14, sensors.getExhaustTemperatureK());
-    engineMonitor.sendTemperatureMessage(sid, 1, 3, sensors.getEngineRoomTemperatureK());
-    engineMonitor.sendTemperatureMessage(sid, 2, 15, sensors.getAlternatorTemperatureK());
+    engineMonitor.sendTemperatureMessage(sid, 0, 14, sensors.getTemperatureK(ADC_EXHAUST_NTC1));
+    engineMonitor.sendTemperatureMessage(sid, 1, 3, sensors.getTemperatureK(ADC_ENGINEROOM_NTC3));
+    engineMonitor.sendTemperatureMessage(sid, 2, 15, sensors.getTemperatureK(ADC_ALTERNATOR_NTC2));
     sid++;
   }
 }
