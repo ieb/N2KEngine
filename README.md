@@ -15,8 +15,15 @@ Single board. If using a 328p chip you will need to flash the bootloader. See pr
 
 # Memory usage
 
-    RAM:   [===       ]  25.5% (used 522 bytes from 2048 bytes)
-    Flash: [======    ]  60.6% (used 19560 bytes from 32256 bytes)
+after reducing memory requirements (580 used before)
+
+    RAM:   [==        ]  23.8% (used 487 bytes from 2048 bytes)
+    Flash: [======    ]  63.1% (used 20366 bytes from 32256 bytes)
+
+after 1 wire addition and better cli
+
+    RAM:   [===       ]  28.8% (used 589 bytes from 2048 bytes)
+    Flash: [========  ]  81.2% (used 26198 bytes from 32256 bytes)    
 
 NB, no malloc in use in code.
 
@@ -29,12 +36,21 @@ NB, no malloc in use in code.
 * [x] Port code from original
 * [x] Allow for 16MHz MCP2515 oscillator, current library uses 8MHz.
 * [x] Handle when engine not running, now that device is powered from CanBus
-* [x] Reduce memory requiments in EngineSensorts and bind measurements to messages.
+* [x] Reduce memory requirements in EngineSensorts and bind measurements to messages.
 * [x] PR SmallNMEA2000 with changes
-* [ ] Test and Calibrate NTCs
-* [ ] Test and Calibrate Coolant and fuel
-* [ ] Test On N2K Bus
-* [ ] 
+* [x] Test and Calibrate NTCs
+* [x] Test and Calibrate Coolant and fuel
+* [x] Test On N2K Bus
+* [x] Implement 1 wire
+* [x] Allow Engine Hours to be set via serial
+* [x] Improve status and diagnostics to include n2k traffic
+* [ ] Implement status alarms
+* [ ] Consider swapping NTC4 for a oil pressure sensor if it can be accommodated.
+* [ ] Install onboard
+
+# Could do... but probably will not
+
+uses about 50mA when running, but could probably reduce by powering most of the sensors by pulling an IO pin down which would mean NTCs, Fuel and perhaps other ADC dividers would only draw current when being read. However this might safe 5mA and when the engine is running, 8mA is irrelevant. The Fuel sensor is powered of 5v and draws 5mA which is the worst offender. Temperature sensors are 10K NTCs drawing 0.5mA each. Engine coolant sensor is powered by the engine so not relevant and the comparitor chip is idle when the engine is not running. Could power this down when there is no engine battery voltage indicating the engine controls are on. TBH, not sure its wroth optimising power as all the instruments draw about 2.5A currently (including chart plotter) so this represents +2% drain, which is less than adjusting the brightness on the OLED displays.
 
 
 

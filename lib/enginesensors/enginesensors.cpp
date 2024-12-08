@@ -3,9 +3,10 @@
 #include <EEPROM.h>
 #include <SmallNMEA2000.h>
 
+
 #ifdef DEBUGON
-#define DEBUG(x) Serial.print(x)
-#define DEBUGLN(x) Serial.println(x)
+#define DEBUG(x) if (debug) Serial.print(x)
+#define DEBUGLN(x) if (debug) Serial.println(x)
 #define INFO(x)  Serial.print(x)
 #define INFOLN(x) Serial.println(x)
 #else
@@ -68,6 +69,30 @@ void EngineSensors::loadEngineHours() {
   Serial.println(0.004166666667*engineHours.engineHoursPeriods);
 }
 
+void EngineSensors::writeEnginHours() {
+  CRCStorage crcStore;
+  crcStore.crc = 0;
+  for (int i = 0; i < 4; i++) {    
+    crcStore.crc = _crc16_update(crcStore.crc, engineHours.engineHoursBytes[i]);
+  }
+  EEPROM.write(0, crcStore.crcBytes[0]);
+  EEPROM.write(1, crcStore.crcBytes[1]);
+  for (int i = 0; i < 4; i++) {
+    EEPROM.write(i+2, engineHours.engineHoursBytes[i]);
+  }
+}
+
+
+void EngineSensors::setEngineSeconds(double seconds) {
+  engineHours.engineHoursPeriods = seconds/15L;
+  writeEnginHours();
+}
+
+double EngineSensors::getEngineSeconds() {  
+  return 15L*engineHours.engineHoursPeriods; 
+};
+
+
 bool EngineSensors::isEngineRunning() { 
   return engineRunning; 
 };
@@ -83,16 +108,7 @@ void EngineSensors::saveEngineHours() {
     } else if ( now-lastEngineHoursTick > ENGINE_HOURS_PERIOD_MS ) {
       lastEngineHoursTick = now;
       engineHours.engineHoursPeriods++;
-      CRCStorage crcStore;
-      crcStore.crc = 0;
-      for (int i = 0; i < 4; i++) {    
-        crcStore.crc = _crc16_update(crcStore.crc, engineHours.engineHoursBytes[i]);
-      }
-      EEPROM.write(0, crcStore.crcBytes[0]);
-      EEPROM.write(1, crcStore.crcBytes[1]);
-      for (int i = 0; i < 4; i++) {
-        EEPROM.write(i+2, engineHours.engineHoursBytes[i]);
-      }
+      writeEnginHours();
     }
   } else if ( engineRPM > 0 ) {
       engineRunning = true;
@@ -116,8 +132,8 @@ void EngineSensors::readEngineRPM() {
     engineRPM = 0;
   } else {
      engineRPM =  (RPM_FACTOR*10000000.0)/(double)period;
-    INFO("Period ");INFOLN(period);
-    INFO("RPM ");INFOLN(engineRPM);
+    DEBUG("Period ");DEBUGLN(period);
+    DEBUG("RPM ");DEBUGLN(engineRPM);
   }
 }
 
@@ -127,9 +143,8 @@ double EngineSensors::getEngineRPM() {
 
 
 
-double EngineSensors::getEngineSeconds() {  
-  return 15L*engineHours.engineHoursPeriods; 
-};
+
+
        
 
 
@@ -137,29 +152,30 @@ double EngineSensors::getFuelCapacity() {
   return FUEL_CAPACITY;
 }
  
-// Fuel sensor goes 0-190, 0 being full, 190 being empty.
-// tested ok.
+// European Fuel sensor goes 0-190, 190 being full, 0 being empty.
 double EngineSensors::getFuelLevel(uint8_t adc) { 
     // probably need a long to do this calc
-    INFO(F("Fuel:"));
-    int16_t fuelReading = analogRead(adc);
-    INFO(fuelReading);
-    INFO(",");
+    DEBUG(F("Fuel:"));
+    double fuelReading = analogRead(adc);
+    DEBUG(fuelReading);
+    DEBUG(",");
     // Rtop = 1000
-    // Rempty = 190
-    // Rfull = 0
-    // ADCempty = 8*190/(190+1000) =  1.277 = 1024*1.277/5 = 261
-    // Measured at 263
+    // Rempty = 0
+    // Rfull = 190
+    // diode drop 0.63v
+    // ADCempty = (5-0.63)*190/(190+1000) =  0.697731092436975 = 1024*0.697731092436975/5 = 142
+    // TODO measure and check.
 
     // ADCfull = 0 = 0v 0
-    fuelReading  = 100-(100*(ADC_READING_EMPTY-fuelReading))/(ADC_READING_EMPTY);
+
+    fuelReading  = 100.0*(fuelReading/142.0);
     // the restances may be out of spec so deal with > 100 or < 0.
+    DEBUGLN(fuelReading);
     if (fuelReading > 100 ) {
       return 100.0;
     } else if ( fuelReading < 0) {
       return 0.0;
     } 
-    INFOLN(fuelLevel);
     return (double)fuelReading;
 }
 
@@ -256,6 +272,7 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
     return ((double)coolantTemperature)+273.15; 
 
 }
+
 
 double EngineSensors::getVoltage(uint8_t adc) { 
   double voltage = VOLTAGE_SCALE*analogRead(adc);
@@ -361,7 +378,7 @@ const int16_t tcurveNMF5210K[] PROGMEM= {
 // tested ok 20210909
 double EngineSensors::getTemperatureK(uint8_t adc) {
   // probably need a long to do this calc
-  DEBUGLN(F("Temp"));
+  DEBUG(F("Temp "));
   int ntcReading = analogRead(adc);
   if ( ntcReading > DISCONNECTED_NTC ) {
     DEBUGLN("disconnected");
@@ -412,6 +429,8 @@ int16_t EngineSensors::interpolate(
   DEBUG("^,");
   return maxCurveValue;
 }
+
+
 
 
 

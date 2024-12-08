@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include "enginesensors.h"
 #include "SmallNMEA2000.h"
+#include <MemoryFree.h>
+#include "oneWireSensors.h"
 
 
 #define RAPID_ENGINE_UPDATE_PERIOD 500
@@ -87,6 +89,10 @@ EngineMonitor engineMonitor = EngineMonitor(DEVICE_ADDRESS,
 
 EngineSensors sensors(PIN_FLYWHEEL);
 
+OneWire oneWire(PIN_ONE_WIRE);
+OneWireSensors oneWireSensor(&oneWire);
+
+
 /**
  * Send engine rapid updates while the engine is running.
  */ 
@@ -166,13 +172,110 @@ void sendTemperatures() {
   static byte sid = 0;
   unsigned long now = millis();
   if ( now-lastTempUpdate > TEMPERATURE_UPDATE_PERIOD ) {
-    lastTempUpdate = now;
+    lastTempUpdate = now;    
     engineMonitor.sendTemperatureMessage(sid, 0, 14, sensors.getTemperatureK(ADC_EXHAUST_NTC1));
     engineMonitor.sendTemperatureMessage(sid, 1, 3, sensors.getTemperatureK(ADC_ENGINEROOM_NTC3));
     engineMonitor.sendTemperatureMessage(sid, 2, 15, sensors.getTemperatureK(ADC_ALTERNATOR_NTC2));
     sid++;
   }
 }
+
+
+void printN2K(double v, double fact, double offset) {
+  if ( v == SNMEA2000::n2kDoubleNA) {
+    Serial.println("--");
+  } else {
+    Serial.println((v*fact)-offset);
+  }
+}
+
+void showStatus() {
+  sensors.debug = true;
+  Serial.print(F("Free mem  : "));Serial.println(freeMemory());
+  Serial.print(F("Exhaust T : "));printN2K(sensors.getTemperatureK(ADC_EXHAUST_NTC1), 1.0,273.15);
+  Serial.print(F("Alt T     : "));printN2K(sensors.getTemperatureK(ADC_ALTERNATOR_NTC2),1.0, 273.15);
+  Serial.print(F("Room T    : "));printN2K(sensors.getTemperatureK(ADC_ENGINEROOM_NTC3),1.0,273.15);
+  Serial.print(F("A2B T     : "));printN2K(sensors.getTemperatureK(ADC_A2B_NTC4),1.0,273.15);
+  Serial.print(F("Fuel      : "));Serial.println(sensors.getFuelLevel(ADC_FUEL_SENSOR));
+  Serial.print(F("Engine V  : "));printN2K(sensors.getVoltage(ADC_ENGINEBATTERY),1.0,0);
+  Serial.print(F("Alt V     : "));printN2K(sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE),1.0,0);
+  Serial.print(F("Engine h  : "));Serial.println(sensors.getEngineSeconds()/3600.0);
+  Serial.print(F("Coolant T : "));printN2K(sensors.getCoolantTemperatureK(ADC_COOLANT_TEMPERATURE, ADC_ENGINEBATTERY),1.0,273.15);
+  Serial.print(F("Engine On : "));Serial.println(sensors.isEngineRunning()?"Y":"N");
+  Serial.print(F("Engine RPM: "));printN2K(sensors.getEngineRPM(),1.0,0);
+  uint8_t maxActiveDevices = oneWireSensor.getMaxActiveDevice();
+  Serial.print(F("Onewire N : "));Serial.println(maxActiveDevices);
+  for (int i = 0; i < maxActiveDevices; i++) {
+    Serial.print(F("    "));
+    Serial.print(i);
+    Serial.print(F(" : "));
+    Serial.println(oneWireSensor.getTemperature(i));
+
+  }
+  engineMonitor.dumpStatus();
+  sensors.debug = false;
+}
+
+
+void(* resetDevice) (void) = 0; //declare reset function @ address 0
+
+void setEngineHours() {
+  Serial.setTimeout(10000);
+  Serial.print(F("New Engine Hours ?>"));
+  char buffer[10];
+  size_t l = Serial.readBytesUntil('\n', buffer, 9);
+  if ( l > 0) {
+    buffer[l] = '\0';
+    double hours = atof(buffer);
+    Serial.print(F("Setting hours to "));
+    Serial.println(hours);
+    sensors.setEngineSeconds(hours*3600.0);
+  } else {
+    Serial.println("");
+    Serial.println(F("canceled"));
+  }
+  Serial.setTimeout(100);
+}
+
+void toggleDiagnostics() {
+  static bool diagnostics = false;
+  diagnostics = !diagnostics;
+  engineMonitor.setDiagnostics(diagnostics);
+}
+
+void showHelp() {
+  Serial.println(F("N2K Engine monitor."));
+  Serial.println(F("  - Send 'h' to show this message"));
+  Serial.println(F("  - Send 'E' to set engine hours"));
+  Serial.println(F("  - Send 's' to show status"));
+  Serial.println(F("  - Send 'd' to toggle N2k diagnostics"));
+  Serial.println(F("  - Send 'R' to restart"));
+}
+
+
+void checkCommand() {
+  if (Serial.available()) {
+    char chr = Serial.read();
+    switch ( chr ) {
+      case 'h': showHelp(); break;
+      case 's':
+        showStatus();
+        break;
+      case 'E':
+        setEngineHours();
+        break;
+      case 'd':
+        toggleDiagnostics();
+        break;
+      case 'R':
+        Serial.println(F("Restart"));
+        delay(100);
+        resetDevice();
+        break;
+    }
+  }
+}
+
 
 void setup() {
   Serial.begin(115200);
@@ -187,17 +290,23 @@ void setup() {
     delay(5000);
   }
   Serial.println(F("Opened, MCP2515 Operational"));
+
+  Serial.println(F("Starting one wire"));
+  oneWireSensor.begin();
+
   Serial.println(F("Running..."));;
 }
 
 void loop() {
   sensors.read();
+  oneWireSensor.readOneWire();
   sendRapidEngineData();
   sendEngineData();
   sendVoltages();
   sendTemperatures();
   sendFuel();
   engineMonitor.processMessages();
+  checkCommand();
 }
 
 
