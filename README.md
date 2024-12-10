@@ -27,6 +27,29 @@ after 1 wire addition and better cli
 
 NB, no malloc in use in code.
 
+# Status bits.
+
+The status bits in PGN 127489 are set to indicate an alarm condition.
+
+WHen an alarm condition is set if the check engine, maintenance or emergency stop bits are set, they are not
+cleared when the alarm clears. Generally advisable to stop the engine and check.
+
+Emergency stop will be set when temperatures are too high. Best to stop the engine before damage occurs.
+
+Over Temperature status 1 bit 1 set when over temperature is suspected including coolant (> 90C), exhaust > 80C, alternator > 100C, engine room > 70C. Will also set check engine and engine emergency shutdown alarms.
+
+Low oil pressure alarm is set when oil pressure is < 10psi.
+
+If sensors fail then engine comms alarm is set.
+
+Water flow alarm is set when th exhaust temperature > 80C as there is probably no raw water.
+
+Charge indicator alarm is set when the alternator voltage is < 12.8V
+
+Engine shutdown alarm will be set when the engine is shutting down.
+
+Other alarms are not set at this time.
+
 
 
 # Todo
@@ -44,8 +67,9 @@ NB, no malloc in use in code.
 * [x] Implement 1 wire
 * [x] Allow Engine Hours to be set via serial
 * [x] Improve status and diagnostics to include n2k traffic
-* [ ] Implement status alarms
-* [ ] Consider swapping NTC4 for a oil pressure sensor if it can be accommodated.
+* [x] Implement status alarms
+* [x] Consider swapping NTC4 for a oil pressure sensor if it can be accommodated.
+* [x] Power from Engine supply since oil pressure sensors use > 10mA typically. This means fuel levels and temperature will only be available with engine controls turned on.
 * [ ] Install onboard
 
 # Could do... but probably will not

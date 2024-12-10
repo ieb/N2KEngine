@@ -27,7 +27,7 @@
 #define ADC_EXHAUST_NTC1 2 // NTC1
 #define ADC_ALTERNATOR_NTC2 3 // NTC2
 #define ADC_ENGINEROOM_NTC3 4
-#define ADC_A2B_NTC4 5
+#define ADC_OIL_SENSOR 5
 #define ADC_COOLANT_TEMPERATURE 6
 #define ADC_ENGINEBATTERY 7
 
@@ -117,14 +117,21 @@ void sendEngineData() {
     unsigned long now = millis();
     if ( now-lastEngineUpdate > ENGINE_UPDATE_PERIOD ) {
       lastEngineUpdate = now;
+      double engineSeconds = sensors.getEngineSeconds();
+      double coolantTemperature = sensors.getCoolantTemperatureK(ADC_COOLANT_TEMPERATURE, ADC_ENGINEBATTERY);
+      double alternatorVoltage = sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE);
+      double oilPressure = sensors.getOilPressure(ADC_OIL_SENSOR);
+      double alternatorTemperature = sensors.getTemperatureK(ADC_ALTERNATOR_NTC2);
+      uint16_t status1 = sensors.getEngineStatus1();
+      uint16_t status2 = sensors.getEngineStatus2();
       engineMonitor.sendEngineDynamicParamMessage(ENGINE_INSTANCE,
-          sensors.getEngineSeconds(),
-          sensors.getCoolantTemperatureK(ADC_COOLANT_TEMPERATURE, ADC_ENGINEBATTERY),
-          sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE),
-          0, // status1
-          0, // status2
-          SNMEA2000::n2kDoubleNA, // engineOilPressure
-          sensors.getTemperatureK(ADC_ALTERNATOR_NTC2) // alterator temperature as nengineOil temperature
+          engineSeconds,
+          coolantTemperature,
+          alternatorVoltage,
+          status1, // status1
+          status2, // status2
+          oilPressure, // engineOilPressure
+          alternatorTemperature // alterator temperature as engineOil temperature, more important with LiFeP04
           );
     }
   }
@@ -195,12 +202,12 @@ void showStatus() {
   Serial.print(F("Exhaust T : "));printN2K(sensors.getTemperatureK(ADC_EXHAUST_NTC1), 1.0,273.15);
   Serial.print(F("Alt T     : "));printN2K(sensors.getTemperatureK(ADC_ALTERNATOR_NTC2),1.0, 273.15);
   Serial.print(F("Room T    : "));printN2K(sensors.getTemperatureK(ADC_ENGINEROOM_NTC3),1.0,273.15);
-  Serial.print(F("A2B T     : "));printN2K(sensors.getTemperatureK(ADC_A2B_NTC4),1.0,273.15);
   Serial.print(F("Fuel      : "));Serial.println(sensors.getFuelLevel(ADC_FUEL_SENSOR));
   Serial.print(F("Engine V  : "));printN2K(sensors.getVoltage(ADC_ENGINEBATTERY),1.0,0);
   Serial.print(F("Alt V     : "));printN2K(sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE),1.0,0);
   Serial.print(F("Engine h  : "));Serial.println(sensors.getEngineSeconds()/3600.0);
   Serial.print(F("Coolant T : "));printN2K(sensors.getCoolantTemperatureK(ADC_COOLANT_TEMPERATURE, ADC_ENGINEBATTERY),1.0,273.15);
+  Serial.print(F("Oil Psi   : "));printN2K(sensors.getOilPressure(ADC_OIL_SENSOR),1.0/6894.76,0.0);
   Serial.print(F("Engine On : "));Serial.println(sensors.isEngineRunning()?"Y":"N");
   Serial.print(F("Engine RPM: "));printN2K(sensors.getEngineRPM(),1.0,0);
   uint8_t maxActiveDevices = oneWireSensor.getMaxActiveDevice();

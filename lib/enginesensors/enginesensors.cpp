@@ -105,14 +105,20 @@ void EngineSensors::saveEngineHours() {
   if ( engineRunning ) {
     if ( engineRPM == 0 ) {
       engineRunning = false;
+      SET_BIT(status2, ENGINE_STATUS2_ENGINE_SUTTING_DOWN);
     } else if ( now-lastEngineHoursTick > ENGINE_HOURS_PERIOD_MS ) {
       lastEngineHoursTick = now;
       engineHours.engineHoursPeriods++;
       writeEnginHours();
     }
-  } else if ( engineRPM > 0 ) {
+  } else {
+    if ( engineRPM > 0 ) {
       engineRunning = true;
       lastEngineHoursTick = now;
+    } else {
+      CLEAR_BIT(status1, ENGINE_STATUS1_EMERGENCY_STOP);
+      CLEAR_BIT(status2, ENGINE_STATUS2_ENGINE_SUTTING_DOWN);
+    }
   }
 }
 
@@ -131,7 +137,7 @@ void EngineSensors::readEngineRPM() {
     // no pulses, > 10MHz or < 10Hz, assume not running.
     engineRPM = 0;
   } else {
-     engineRPM =  (RPM_FACTOR*10000000.0)/(double)period;
+    engineRPM =  (RPM_FACTOR*10000000.0)/(double)period;
     DEBUG("Period ");DEBUGLN(period);
     DEBUG("RPM ");DEBUGLN(engineRPM);
   }
@@ -140,9 +146,6 @@ void EngineSensors::readEngineRPM() {
 double EngineSensors::getEngineRPM() {
   return engineRPM;
 }
-
-
-
 
 
        
@@ -171,12 +174,63 @@ double EngineSensors::getFuelLevel(uint8_t adc) {
     fuelReading  = 100.0*(fuelReading/142.0);
     // the restances may be out of spec so deal with > 100 or < 0.
     DEBUGLN(fuelReading);
+    if ( fuelReading < 10 ) {
+      SET_BIT(status2, ENGINE_STATUS2_WARN_1);
+    } else {
+      CLEAR_BIT(status2, ENGINE_STATUS2_WARN_1);
+    }
     if (fuelReading > 100 ) {
       return 100.0;
     } else if ( fuelReading < 0) {
       return 0.0;
     } 
     return (double)fuelReading;
+}
+
+uint16_t EngineSensors::getEngineStatus1() {
+  return status1;
+}
+
+uint16_t EngineSensors::getEngineStatus2() {
+  return status2;
+}
+
+// in Pascal
+double EngineSensors::getOilPressure(uint8_t adc) {
+    DEBUG(F("Fuel:"));
+    double oilPressureReading = analogRead(adc);
+    DEBUG(oilPressureReading);
+    DEBUG(",");
+    // 0psi == 0.5v = 1024*0.5/5.0=102.4
+    // 100psi = 4.5v = 1024*4.5/5.0=921.6
+    // 100ps == 921.6-102.4=819.2
+    // scale == 100/819.2 = 0.1220703125
+    // 1psi = 6894.76Pa 
+    // scal in PA == 0.1220703125*6894.76 = 841.6455078125
+    // linear, no divider
+    // 
+    // in psi
+    if ( oilPressureReading < 90 ) {
+      // disconnected or not powered up
+      CLEAR_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES);
+      SET_BIT(status2, ENGINE_STATUS2_ENGINE_COMM_ERROR);
+      return SNMEA2000::n2kDoubleNA;
+    }
+    CLEAR_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES);
+    CLEAR_BIT(status2, ENGINE_STATUS2_ENGINE_COMM_ERROR);
+    oilPressureReading = (oilPressureReading-102.4)*841.6455078125;
+    DEBUGLN(oilPressureReading);
+    if ( oilPressureReading < 0 ) {
+      oilPressureReading = 0;
+    }
+    if (oilPressureReading < 68940.0) { // 10psi
+      SET_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES | ENGINE_STATUS1_CHECK_ENGINE);
+      SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED );
+    } else {
+      CLEAR_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES);
+    }
+    return oilPressureReading;
+
 }
 
 
@@ -269,6 +323,13 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
     DEBUG(",");
     int16_t coolantTemperature = interpolate(coolantReading,COOLANT_MIN_TEMPERATURE, COOLANT_MAX_TEMPERATURE, COOLANT_STEP, coolantTable, COOLANT_TABLE_LENGTH);
     DEBUG("CCC");DEBUGLN(coolantTemperature);
+
+    if ( coolantTemperature > 90) {
+      SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE);
+      SET_BIT(status1, ENGINE_STATUS2_MAINTANENCE_NEEDED);
+    } else {
+      CLEAR_BIT(status1, ENGINE_STATUS1_OVERTEMP);
+    }
     return ((double)coolantTemperature)+273.15; 
 
 }
@@ -280,9 +341,21 @@ double EngineSensors::getVoltage(uint8_t adc) {
   DEBUG(adc);
   DEBUG(F(" V:"));
   DEBUGLN(voltage);
+  if ( adc == ADC_ALTERNATOR_VOLTAGE ) {
+    if ( voltage < 12.8) {
+      SET_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
+    } else {
+      CLEAR_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
+    }
+  } else if ( adc == ADC_ENGINEBATTERY) {
+    if ( voltage < 11.8) {
+      SET_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);
+    } else {
+      CLEAR_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);
+    }
+  }
   return voltage; 
 };
-
 
 
 /*
@@ -390,8 +463,32 @@ double EngineSensors::getTemperatureK(uint8_t adc) {
   DEBUG(",");
   int16_t temperature = interpolate(ntcReading, NMF5210K_MIN, NMF5210K_MAX, NMF5210K_STEP, tcurveNMF5210K, NMF5210K_LENGTH);
   DEBUGLN(temperature);
+  if ( adc == ADC_EXHAUST_NTC1 ) {
+    if ( temperature > 80.0) {
+      SET_BIT(status1, ENGINE_STATUS1_WATER_FLOW | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
+      SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED);
+    } else if ( temperature < 50.0) {
+      CLEAR_BIT(status1, ENGINE_STATUS1_WATER_FLOW);
+    }
+  } else if ( ADC_ALTERNATOR_NTC2) {
+    if ( temperature > 100.0) {
+      SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
+      SET_BIT(status1, ENGINE_STATUS2_WARN_2);
+    } else if ( temperature < 50 ) {
+      CLEAR_BIT(status1, ENGINE_STATUS2_WARN_2);
+    }
+  } else if ( ADC_ENGINEROOM_NTC3 ) {
+    if ( temperature > 70.0) {
+      SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
+      SET_BIT(status1, ENGINE_STATUS2_WARN_2);
+    } else if ( temperature < 40 ) {
+      CLEAR_BIT(status1, ENGINE_STATUS2_WARN_2);
+    }
+  }
   return (0.1*temperature)+273.15;
 }
+
+
 
 
 /**
