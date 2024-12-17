@@ -72,10 +72,10 @@ void OneWireSensors::readOneWire() {
 
       if ( temperature[i] == SNMEA2000::n2kDoubleNA ) {
         if ( t != 85.0) {
-            temperature[i] = t;
+            temperature[i] = t+273.15;
         }
       } else {
-        temperature[i] = t;
+        temperature[i] = t+273.15;
       }
     }
     requestTemperaturesRequired = true;
@@ -88,7 +88,7 @@ uint8_t OneWireSensors::getMaxActiveDevice() {
 }
 
 
-double OneWireSensors::getTemperature(uint8_t  n) {
+double OneWireSensors::getTemperatureK(uint8_t  n) {
     if ( n < maxActiveDevice ) {
         return temperature[n];
     }

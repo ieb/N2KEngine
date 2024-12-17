@@ -181,8 +181,14 @@ void sendTemperatures() {
   if ( now-lastTempUpdate > TEMPERATURE_UPDATE_PERIOD ) {
     lastTempUpdate = now;    
     engineMonitor.sendTemperatureMessage(sid, 0, 14, sensors.getTemperatureK(ADC_EXHAUST_NTC1));
-    engineMonitor.sendTemperatureMessage(sid, 1, 3, sensors.getTemperatureK(ADC_ENGINEROOM_NTC3));
-    engineMonitor.sendTemperatureMessage(sid, 2, 15, sensors.getTemperatureK(ADC_ALTERNATOR_NTC2));
+    engineMonitor.sendTemperatureMessage(sid, 0, 3, sensors.getTemperatureK(ADC_ENGINEROOM_NTC3));
+    // custom temperatures
+    // temperature source can be 0-255, 0-15 are defined.
+    engineMonitor.sendTemperatureMessage(sid, 0, 30, sensors.getTemperatureK(ADC_ALTERNATOR_NTC2));
+    uint8_t maxActiveDevices = oneWireSensor.getMaxActiveDevice();
+    for (int i = 0; i < maxActiveDevices; i++) {
+      engineMonitor.sendTemperatureMessage(sid, 0, 31+i, oneWireSensor.getTemperatureK(i));
+    }
     sid++;
   }
 }
@@ -216,8 +222,7 @@ void showStatus() {
     Serial.print(F("    "));
     Serial.print(i);
     Serial.print(F(" : "));
-    Serial.println(oneWireSensor.getTemperature(i));
-
+    printN2K(oneWireSensor.getTemperatureK(i),1.0,273.15);
   }
   engineMonitor.dumpStatus();
   sensors.debug = false;

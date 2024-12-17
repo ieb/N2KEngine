@@ -12,7 +12,7 @@ class OneWireSensors {
       }
       void begin();
       uint8_t getMaxActiveDevice();
-      double getTemperature(uint8_t  n);
+      double getTemperatureK(uint8_t  n);
       void readOneWire();
 
     private:
