@@ -77,6 +77,7 @@ Other alarms are not set at this time.
 * [x] Implement status alarms
 * [x] Consider swapping NTC4 for a oil pressure sensor if it can be accommodated.
 * [x] Power from Engine supply since oil pressure sensors use > 10mA typically. This means fuel levels and temperature will only be available with engine controls turned on.
+* [x] Check voltage calibration, some doubt over digtal multi meter accuracy used previously - verified against a ADS1115 to be accurate
 * [ ] Install onboard
 
 # Could do... but probably will not

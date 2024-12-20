@@ -1,4 +1,5 @@
 
+#include "version.h"
 #include <Arduino.h>
 #include "enginesensors.h"
 #include "SmallNMEA2000.h"
@@ -257,6 +258,7 @@ void toggleDiagnostics() {
 
 void showHelp() {
   Serial.println(F("N2K Engine monitor."));
+  Serial.print("Git Version: ");Serial.println(GIT_SHA1_VERSION);
   Serial.println(F("  - Send 'h' to show this message"));
   Serial.println(F("  - Send 'E' to set engine hours"));
   Serial.println(F("  - Send 's' to show status"));
