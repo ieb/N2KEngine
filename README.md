@@ -57,7 +57,19 @@ Engine shutdown alarm will be set when the engine is shutting down.
 
 Other alarms are not set at this time.
 
+# Building and Uploading
 
+Can be built on any 328p suitably wired, however to build using the pcb design first flash a bootloader, see [programBootLoader/README.md] for details, then come back here.
+
+Having flashed with the urbootloader connect a serial adapter configured for 5V to the serial header pins, adjust platform.ini to reflect the serial port and run
+
+    pio run -t upload
+
+to monitor
+
+    pio device monitor
+
+Do not attempt to power the board both on the 12v line and through the serial port 5v at the same time. This will probably shutdown the USB port on your laptop (or worse produce some smoke) Monitoring over serial can be done provided only GND, TX and RX are attached. Ie no power from the serial adapter.
 
 # Todo
 
@@ -78,6 +90,7 @@ Other alarms are not set at this time.
 * [x] Consider swapping NTC4 for a oil pressure sensor if it can be accommodated.
 * [x] Power from Engine supply since oil pressure sensors use > 10mA typically. This means fuel levels and temperature will only be available with engine controls turned on.
 * [x] Check voltage calibration, some doubt over digtal multi meter accuracy used previously - verified against a ADS1115 to be accurate
+* [x] Add firmware version, shows on the help, press h when connected over serial.
 * [ ] Install onboard
 
 # Could do... but probably will not
