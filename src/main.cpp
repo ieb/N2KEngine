@@ -23,6 +23,9 @@
 
 
 // ADC assignments
+
+#if TARGET_MCU == 328
+
 #define ADC_ALTERNATOR_VOLTAGE 0
 #define ADC_FUEL_SENSOR 1
 #define ADC_EXHAUST_NTC1 2 // NTC1
@@ -31,13 +34,52 @@
 #define ADC_OIL_SENSOR 5
 #define ADC_COOLANT_TEMPERATURE 6
 #define ADC_ENGINEBATTERY 7
-
-
-
 // Digital pin assignments
 // Flywheel pulse pin
 #define PIN_FLYWHEEL 2
 #define PIN_ONE_WIRE 3 // not used at present
+
+
+// defaults
+#define SNMEA_SPI_M0SI 11 
+#define SNMEA_SPI_MISO 12 
+#define SNMEA_SPI_SCK  13 
+#define SNMEA_SPI_CS_PIN 10
+
+
+#elif TARGET_MCU == 3226
+
+#define ADC_ALTERNATOR_VOLTAGE PIN_PA5
+#define ADC_FUEL_SENSOR PIN_PA6
+#define ADC_EXHAUST_NTC1 PIN_PA7 // NTC1
+#define ADC_ALTERNATOR_NTC2 PIN_PB5 // NTC2
+#define ADC_ENGINEROOM_NTC3 PIN_PB4
+#define ADC_OIL_SENSOR PIN_PB1
+#define ADC_COOLANT_TEMPERATURE PIN_PA4
+#define ADC_ENGINEBATTERY PIN_PB0
+
+
+#define PIN_FLYWHEEL PIN_PC2
+#define PIN_ONE_WIRE PIN_PC1 
+
+#define SNMEA_SPI_M0SI PIN_PA1 // Default pin
+#define SNMEA_SPI_MISO PIN_PA2 // Default Pin
+#define SNMEA_SPI_SCK  PIN_PA3 // Default pin
+#define SNMEA_SPI_CS_PIN  PIN_PC3 // not default, set in constructor
+#define LED_PIN PIN_PC0
+
+#else
+
+#error "TARGET_MCU ,not defined"
+#endif
+
+
+
+
+
+
+#define DEVICE_ADDRESS 24
+
 
 
 
@@ -77,8 +119,7 @@ SNMEA2000DeviceInfo devInfo = SNMEA2000DeviceInfo(
 );
 
 
-#define DEVICE_ADDRESS 24
-#define SNMEA_SPI_CS_PIN 10
+
 
 EngineMonitor engineMonitor = EngineMonitor(DEVICE_ADDRESS,
   &devInfo,
@@ -93,6 +134,41 @@ EngineSensors sensors(PIN_FLYWHEEL);
 OneWire oneWire(PIN_ONE_WIRE);
 OneWireSensors oneWireSensor(&oneWire);
 
+#ifdef LED_PIN
+void toggleLed() {
+  digitalWrite(LED_PIN, !digitalRead(LED_PIN));
+}
+void asyncBlink() {
+  static unsigned long lastToggle=0;
+  unsigned long now = millis();
+  if ( now-lastToggle > 5000 ) {
+    lastToggle = now;
+    toggleLed();
+  }
+}
+
+void setupLed() {
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+}
+void blinkLed(int n) {
+  for (int i = 0; i < n; i++) {
+    digitalWrite(LED_PIN, HIGH);
+    delay(100);
+    digitalWrite(LED_PIN, LOW);
+    delay(100);    
+  }
+}
+
+
+#else
+void setupLed(){};
+void asyncBlink(){};
+void toggleLed(){};
+void blinkLed(int n){};
+#endif
+
+
 
 /**
  * Send engine rapid updates while the engine is running.
@@ -103,6 +179,7 @@ void sendRapidEngineData() {
     unsigned long now = millis();
     if ( now-lastRapidEngineUpdate > RAPID_ENGINE_UPDATE_PERIOD ) {
       lastRapidEngineUpdate = now;
+      toggleLed();
       engineMonitor.sendRapidEngineDataMessage(ENGINE_INSTANCE, sensors.getEngineRPM());
     }
   }
@@ -118,6 +195,7 @@ void sendEngineData() {
     unsigned long now = millis();
     if ( now-lastEngineUpdate > ENGINE_UPDATE_PERIOD ) {
       lastEngineUpdate = now;
+      toggleLed();
       double engineSeconds = sensors.getEngineSeconds();
       double coolantTemperature = sensors.getCoolantTemperatureK(ADC_COOLANT_TEMPERATURE, ADC_ENGINEBATTERY);
       double alternatorVoltage = sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE);
@@ -147,6 +225,7 @@ void sendVoltages() {
   unsigned long now = millis();
   if ( now-lastVoltageUpdate > VOLTAGE_UPDATE_PERIOD ) {
     lastVoltageUpdate = now;
+      toggleLed();
     // because the engine monitor is not on all the time, the sid and instance ids of these messages has been shifted
     // to make space for sensors that are on all the time, and would be used by default
     // engineMonitor.sendDCBatterStatusMessage(SERVICE_BATTERY_INSTANCE, sid, sensors.getServiceBatteryVoltage());
@@ -167,6 +246,7 @@ void sendFuel() {
   unsigned long now = millis();
   if ( now-lastFuelUpdate > FUEL_UPDATE_PERIOD ) {
     lastFuelUpdate = now;
+      toggleLed();
     engineMonitor.sendFluidLevelMessage(FUEL_TYPE, FUEL_LEVEL_INSTANCE, sensors.getFuelLevel(ADC_FUEL_SENSOR), sensors.getFuelCapacity());
 
   }
@@ -181,6 +261,8 @@ void sendTemperatures() {
   unsigned long now = millis();
   if ( now-lastTempUpdate > TEMPERATURE_UPDATE_PERIOD ) {
     lastTempUpdate = now;    
+      toggleLed();
+    // this may need adjusting depending on what the instruments can display
     engineMonitor.sendTemperatureMessage(sid, 0, 14, sensors.getTemperatureK(ADC_EXHAUST_NTC1));
     engineMonitor.sendTemperatureMessage(sid, 0, 3, sensors.getTemperatureK(ADC_ENGINEROOM_NTC3));
     // custom temperatures
@@ -197,7 +279,7 @@ void sendTemperatures() {
 
 void printN2K(double v, double fact, double offset) {
   if ( v == SNMEA2000::n2kDoubleNA) {
-    Serial.println("--");
+    Serial.println(F("--"));
   } else {
     Serial.println((v*fact)-offset);
   }
@@ -205,11 +287,12 @@ void printN2K(double v, double fact, double offset) {
 
 void showStatus() {
   sensors.debug = true;
+  Serial.print(F("CPU Vdd   : "));Serial.println(sensors.getStoredVddVoltage());
   Serial.print(F("Free mem  : "));Serial.println(freeMemory());
   Serial.print(F("Exhaust T : "));printN2K(sensors.getTemperatureK(ADC_EXHAUST_NTC1), 1.0,273.15);
   Serial.print(F("Alt T     : "));printN2K(sensors.getTemperatureK(ADC_ALTERNATOR_NTC2),1.0, 273.15);
   Serial.print(F("Room T    : "));printN2K(sensors.getTemperatureK(ADC_ENGINEROOM_NTC3),1.0,273.15);
-  Serial.print(F("Fuel      : "));Serial.println(sensors.getFuelLevel(ADC_FUEL_SENSOR));
+  Serial.print(F("Fuel      : "));printN2K(sensors.getFuelLevel(ADC_FUEL_SENSOR),1.0,0);
   Serial.print(F("Engine V  : "));printN2K(sensors.getVoltage(ADC_ENGINEBATTERY),1.0,0);
   Serial.print(F("Alt V     : "));printN2K(sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE),1.0,0);
   Serial.print(F("Engine h  : "));Serial.println(sensors.getEngineSeconds()/3600.0);
@@ -226,6 +309,18 @@ void showStatus() {
     printN2K(oneWireSensor.getTemperatureK(i),1.0,273.15);
   }
   engineMonitor.dumpStatus();
+
+
+  Serial.print(F("ADC_EXHAUST_NTC1"));sensors.dumpADC(ADC_EXHAUST_NTC1);
+  Serial.print(F("ADC_ALTERNATOR_NTC2: "));sensors.dumpADC(ADC_ALTERNATOR_NTC2);
+  Serial.print(F("ADC_ENGINEROOM_NTC3: "));sensors.dumpADC(ADC_ENGINEROOM_NTC3);
+  Serial.print(F("ADC_ALTERNATOR_VOLTAGE: "));sensors.dumpADC(ADC_ALTERNATOR_VOLTAGE);
+  Serial.print(F("ADC_FUEL_SENSOR: "));sensors.dumpADC(ADC_FUEL_SENSOR);
+  Serial.print(F("ADC_OIL_SENSOR: "));sensors.dumpADC(ADC_OIL_SENSOR);
+  Serial.print(F("ADC_COOLANT_TEMPERATURE: "));sensors.dumpADC(ADC_COOLANT_TEMPERATURE);
+  Serial.print(F("ADC_ENGINEBATTERY: "));sensors.dumpADC(ADC_ENGINEBATTERY);
+
+  Serial.print(F("CPU Supply: "));sensors.dumpADCVDD();  
   sensors.debug = false;
 }
 
@@ -250,6 +345,24 @@ void setEngineHours() {
   Serial.setTimeout(100);
 }
 
+void setStoredVddVoltage() {
+  Serial.setTimeout(10000);
+  Serial.print(F("Calibrated Vdd Voltage ?>"));
+  char buffer[10];
+  size_t l = Serial.readBytesUntil('\n', buffer, 9);
+  if ( l > 0) {
+    buffer[l] = '\0';
+    double measuredVoltagee = atof(buffer);
+    Serial.print(F("Calibrated Vdd Voltage to :"));
+    Serial.println(measuredVoltagee,5);
+    sensors.setStoredVddVoltage(measuredVoltagee);
+  } else {
+    Serial.println("");
+    Serial.println(F("canceled"));
+  }
+  Serial.setTimeout(100);
+}
+
 void toggleDiagnostics() {
   static bool diagnostics = false;
   diagnostics = !diagnostics;
@@ -258,9 +371,11 @@ void toggleDiagnostics() {
 
 void showHelp() {
   Serial.println(F("N2K Engine monitor."));
-  Serial.print("Git Version: ");Serial.println(GIT_SHA1_VERSION);
+  Serial.print(F("Git Version: "));Serial.println(F(GIT_SHA1_VERSION));
   Serial.println(F("  - Send 'h' to show this message"));
   Serial.println(F("  - Send 'E' to set engine hours"));
+  Serial.println(F("  - Send 'V' to set Vdd Supply voltage"));
+  Serial.println(F("  - Send 'F' fake Engine RPM at 1K"));
   Serial.println(F("  - Send 's' to show status"));
   Serial.println(F("  - Send 'd' to toggle N2k diagnostics"));
   Serial.println(F("  - Send 'R' to restart"));
@@ -278,8 +393,14 @@ void checkCommand() {
       case 'E':
         setEngineHours();
         break;
+      case 'F':
+        sensors.toggleFakeEngineRunning();
+        break;
       case 'd':
         toggleDiagnostics();
+        break;
+      case 'V':
+        setStoredVddVoltage();
         break;
       case 'R':
         Serial.println(F("Restart"));
@@ -291,27 +412,34 @@ void checkCommand() {
 }
 
 
+
 void setup() {
   Serial.begin(115200);
   Serial.println(F("Luna engine monitor start"));
-  while(!sensors.begin() ) {
-    Serial.println(F("Failed to start Engine Sensors, retry in 5s"));
-    delay(5000);
-  }
+  setupLed();
   Serial.println(F("Opening CAN"));
   while (!engineMonitor.open(MCP_16MHz) ) {
-     Serial.println(F("Failed to start NMEA2000, retry in 5s"));
+    Serial.println(F("Failed to start NMEA2000, retry in 5s or check wiring pins"));
     delay(5000);
+    blinkLed(2);
   }
   Serial.println(F("Opened, MCP2515 Operational"));
 
+  while(!sensors.begin() ) {
+    Serial.println(F("Failed to start Engine Sensors, retry in 5s"));
+    delay(5000);
+    blinkLed(3);
+  }
+
   Serial.println(F("Starting one wire"));
   oneWireSensor.begin();
+  blinkLed(4);
 
   Serial.println(F("Running..."));;
 }
 
 void loop() {
+  asyncBlink();
   sensors.read();
   oneWireSensor.readOneWire();
   sendRapidEngineData();

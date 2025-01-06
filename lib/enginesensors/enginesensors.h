@@ -60,46 +60,37 @@
 #define SET_BIT(x,y) x=(x) | (y)
 #define CLEAR_BIT(x,y) x=(x) & (~(y))
 
-// stored as voltage
-// regulator output at 4.92v
-// calibration
-// voltage scale 0.01546609357, reading 14.77, actual, 14.45 new scale = (0.01546609357*14.45/14.77) = 0.01513101233
-// 0.01513101233, 14.46/14.50=0.9972413793, 13.71/13.74=0.9978165939, 12.88/12.91=0.99767622,  12.37/12.39=0.99838
-// (0.9972413793+0.9978165939+0.99767622+0.99838)/4=0.9977785483  0.01513101233*0.9977785483 = 0.01509739952
-#define VOLTAGE_SCALE  0.01509739952 
 
-// Coolant Sensor calibration.
-#define COOLANT_SUPPLY_ADC_12V 780 // calibrated   12V supply Through a 47/100K divider 
-                                   // 12*47/147=3.8367, calibrated at 3.8085 = ADC reading of 1024*3.8085/5=780
-#define MIN_SUPPLY_VOLTAGE 261
 
 
 // Fuel sensor calibration.
 #define FUEL_RESISTOR 1000
-#define ADC_READING_EMPTY 263 // measured for 190R
 #define FUEL_SENSOR_MAX 190
 #define FUEL_CAPACITY 60
 
 
 // pulses  Perms -> RPM conversion.
 // 415Hz at idle below needs adjusting.//
-// 415Hz == 850 rpm
-// 
-// pulses*850*1000/(duration)*415
-//  2.054
-// 1879/1930=0.9735751295    1.9997233161  
-#define RPM_FACTOR 1.9997233161 // 2048.1927711 // 850000/415
+// 415Hz == 830 rpm
+// There are 30 teeth on the flywheel to count RPM.  (see screenshots/flywheel.png, part number 3840880)
+// Hz to RPM == 60/30 == 2.0  ( not so odd 30 was chosen << 1 on Hz == RPM)
+// There could be a factor to apply to account for any clock frequency errors.
+#define RPM_FACTOR 2.0 
 
 
+class LocalStorage {
+public:
+    LocalStorage() {};
+    void loadVdd();
+    void setVdd(double vdd);
+    void loadEngineHours();
+    void saveEngineHours();
 
-
-union EngineHoursStorage {
-  uint8_t engineHoursBytes[4];
-  uint32_t engineHoursPeriods;
-};
-union CRCStorage {
-  uint8_t crcBytes[2];
-  uint16_t crc;
+    uint32_t engineHoursPeriods = 0;
+    double vdd = 5.0;
+private:
+    void updateCRC();
+    bool eepromValid();
 };
 
 class EngineSensors {
@@ -116,15 +107,23 @@ class EngineSensors {
        bool isEngineRunning();
        void saveEngineHours();
        void setEngineSeconds(double seconds);
+       void toggleFakeEngineRunning();
+
        double getEngineRPM();
 
        double getEngineSeconds();
-       double getFuelLevel(uint8_t adc);
-       double getOilPressure(uint8_t adc);
+       double getFuelLevel(uint8_t adc, bool outoutDebug=false);
+       double getOilPressure(uint8_t adc, bool outoutDebug=false);
        double getFuelCapacity();
-       double getCoolantTemperatureK(uint8_t coolantAdc, uint8_t batteryAdc);
-       double getTemperatureK(uint8_t adc);
-       double getVoltage(uint8_t adc);
+       double getCoolantTemperatureK(uint8_t coolantAdc, uint8_t batteryAdc, bool outoutDebug=false);
+       double getTemperatureK(uint8_t adc, bool outoutDebug=false);
+       double getVoltage(uint8_t adc, bool outoutDebug=false);
+       void dumpADC(uint8_t adc);
+       void dumpADCVDD();
+
+       void setStoredVddVoltage(double measuredVddVoltage);
+       double getStoredVddVoltage();
+
 
        uint16_t getEngineStatus1();
        uint16_t getEngineStatus2();
@@ -143,14 +142,20 @@ class EngineSensors {
             const int16_t *curve, 
             int curveLength
             );
+
       
         uint8_t flywheelPin = 2;
         unsigned long flywheelReadPeriod = DEFAULT_FLYWHEEL_READ_PERIOD;
-        EngineHoursStorage engineHours;
+        LocalStorage localStorage;
         double engineRPM = 0;
         bool engineRunning = false;
         uint16_t status1 = ENGINE_STATUS1_LOW_OIL_PRES | ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE | ENGINE_STATUS1_WATER_FLOW ;
         uint16_t status2 = 0;
+        bool fakeEngineRunning = false;
+
+        unsigned long lastObservation = 0;
+        uint16_t previousPulseCount = 0;
+
 
 
         unsigned long lastFlywheelReadTime = 0;

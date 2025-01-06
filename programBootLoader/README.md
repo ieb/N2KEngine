@@ -1,6 +1,6 @@
-
-
 # Program an Arduino UNO with Arduino ISP 
+
+Only the 328p based board needs a bootloader. The Attiny board is programmed over UDPI with no bootloader, see main readme.
 
 This will program a 328p with a urboot bootloader from https://github.com/MCUdude/MiniCore where previously there was none. Once the bootloader is used, standard programming over UART can be used. Fuses are also set here, see platform.ini here for more details.
 
