@@ -140,7 +140,7 @@ ISR(PORTC_PORT_vect) {
     edges++;
     if ( edges == 50 ) {
       capturedCounts[slot] = TCA0.SINGLE.CNT;
-      capturedOverflows[slot] = overflowInterrupts;
+      capturedOverflows[slot] = timerISRCalls;
       capturedSlot = slot;
       slot = (slot+1)&0x01;
       edges = 0;
