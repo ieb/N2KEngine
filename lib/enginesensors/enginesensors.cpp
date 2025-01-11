@@ -4,14 +4,7 @@
 
 
 
-#if (TARGET_MCU == 328)
-
-#define READ_ADC(x) analogRead((x))
-#define CHECK_ADC(x) false
-#define ADC_RESOLUTION_SCALE 4
-#define RESOLUTION_BITS 1024
-
-#elif (TARGET_MCU == 3226)
+#ifdef __AVR_TINY_2__
 
 #define READ_ADC(x) analogReadEnh((x), 12)
 #define CHECK_ADC(x) ((x) < 0)
@@ -19,8 +12,13 @@
 #define ADC_RESOLUTION_SCALE 1
 #define RESOLUTION_BITS 4096
 
-#endif
+#else
 
+#define READ_ADC(x) analogRead((x))
+#define CHECK_ADC(x) false
+#define ADC_RESOLUTION_SCALE 4
+#define RESOLUTION_BITS 1024
+#endif
 
 // common settings.
 // Oil pressure.
@@ -236,51 +234,17 @@ const int16_t tcurveNMF5210K[] PROGMEM= {
 
 
 
-
-// ISR for frequency measurements.
-// On a 328p measuring the time taken between a fixed number of pulses inside the ISR works for a pure 
-// 5v square wave generated on another pin.
-// but on a 3226 with the real  the reading is very unstable. Not completely certain if its
-// the implementation of micros or due to noise due to a 2V sine wave test pattern. Real sensor emits > 12V sine
-// and upto 80V at 4KRPM. The LM393 pre-circuit has been designed for this.
-
-// Even so, Switching to pulse counting.
-// There are 30 pulses per rev and missing one results in a 2RPM error which is not significant.
-// The original code assumed 1 pulse per rev which will only work with timing the pulse edges.
-// A uint16_t will be ok upto 65K pulses. Observing every 2s would fail at 31KHz which would be 65KRPM.
-// Hence a unint16_t will be fine for a diesel engine which cant go over 4K RPM. Max difference between 
-// observations will be 4000. Overflows handled automatically by uint math, so the ISR code only needs to ++.
-volatile uint16_t pulseCount = 0;
-void flywheelPuseHandler() {
-  pulseCount++;
-}
-
-// The second ISR is called periodically and captures the pulse count in a ring buffer.
-// this can be used to determine the frequency without reference to other timers.
-// The errors will be due to the cpu clock.
-// 
-volatile uint8_t slot = 0;
-volatile uint16_t captures[16];
-void pulseCaptureHandler() {
-  captures[(slot++)&0x0f] = pulseCount;
-}
+extern void setupTimerFrequencyMeasurement(uint8_t flywheelPin);
+extern void setupAdc();
 
 bool EngineSensors::begin() {
   localStorage.loadEngineHours();
   localStorage.loadVdd();
 
+  setupTimerFrequencyMeasurement(flywheelPin);
 
-// 3226 is more accurate with more samples and a slower ADC sample rate.
-#if (TARGET_MCU == 3226)
-  analogReference(VDD); // set reference to the desired voltage, and set that as the ADC reference.
-  delay(100);
-  analogClockSpeed(300); // 300KHz sample rate
-#endif
+  setupAdc();
 
-// PULLUP is required with the LMV393 which is open collector.
-  pinMode(flywheelPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(flywheelPin), flywheelPuseHandler, FALLING);
-  DEBUG(F("ISR enabled"));
   return true;
 }
 
@@ -352,42 +316,6 @@ void EngineSensors::saveEngineHours() {
 
 
 
-void EngineSensors::readEngineRPM() {
-  unsigned long now = micros();
-  // might need to suspend interrupts depending on how the copy is done.
-  uint16_t nowPC = pulseCount;
-  uint16_t totalPulses = nowPC - previousPulseCount;
-  unsigned long period = now - lastObservation;
-  if ( period < 1000000 ) {
-    // dont try and read faster than once per second.
-    return;
-  }
-  lastObservation = now;
-  previousPulseCount = nowPC;
-  double seconds = (double)period/(double)1000000.0;
-  double frequency = (double)totalPulses/seconds;
-  if ( frequency < 200 || frequency > 4000 ) {
-    if ( fakeEngineRunning ) {
-      engineRPM = 1000;
-    } else {
-      engineRPM = 0;
-    }
-  } else {
-    // experimentally discovered correction on an attiny3226, gives an error of < 1%
-    // however stability is a problem as I suspect some edges are being missed.
-    // the signal is completely clean.
-    frequency = ((frequency-1005.0)*0.055)+frequency;
-    engineRPM = 2.0*frequency;
-  }
-  Serial.print(F("RPM Period :"));
-  Serial.print(period);
-  Serial.print(F(" pulses:"));
-  Serial.print(totalPulses);
-  Serial.print(F(" Hz:"));
-  Serial.print(frequency);
-  Serial.print(F(" RPM:"));
-  Serial.println(engineRPM);
-}
 
 double EngineSensors::getEngineRPM() {
   return engineRPM;
@@ -573,23 +501,6 @@ void EngineSensors::dumpADC(uint8_t adc) {
   Serial.println(voltage, 5);
 }
 
-void EngineSensors::dumpADCVDD() {
-#if (TARGET_MCU == 328)
-  Serial.print(F("adc:vdd/10 not available"));
-#elif (TARGET_MCU == 3226)
-  // sum 10 measurements
-  int32_t adcReading = 0;
-  for (int i = 0; i < 10; i++) {
-    adcReading += analogReadEnh(ADC_VDDDIV10, 12); // Take it at 12 bits
-    delay(100);
-  }
-  Serial.print(F("adc:vdd"));
-  Serial.print(F(" raw:"));
-  Serial.print(adcReading);
-  Serial.print(F(" V:"));
-  Serial.println(localStorage.vdd*((double)adcReading/RESOLUTION_BITS), 5);
-#endif
-}
 
 
 double EngineSensors::getVoltage(uint8_t adc, bool outputDebug) { 

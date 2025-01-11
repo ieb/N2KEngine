@@ -5,7 +5,7 @@
 
 
 // read frequencies
-#define DEFAULT_FLYWHEEL_READ_PERIOD 2000
+#define DEFAULT_FLYWHEEL_READ_PERIOD 1000
 
 // Engine hours resolution
 #define ENGINE_HOURS_PERIOD_MS 15000
@@ -123,6 +123,7 @@ class EngineSensors {
 
        void setStoredVddVoltage(double measuredVddVoltage);
        double getStoredVddVoltage();
+        void readEngineRPM();
 
 
        uint16_t getEngineStatus1();
@@ -132,7 +133,6 @@ class EngineSensors {
     private:
         void loadEngineHours();
         void writeEnginHours();
-        void readEngineRPM();
 
         int16_t interpolate(
             int16_t reading, 
@@ -153,8 +153,19 @@ class EngineSensors {
         uint16_t status2 = 0;
         bool fakeEngineRunning = false;
 
-        unsigned long lastObservation = 0;
-        uint16_t previousPulseCount = 0;
+
+#ifdef __AVR_TINY_2__
+#ifdef FREQENCY_METHOD_1
+        uint16_t lastInteruptCount = 0;
+        uint16_t smoothedRPM[4];
+        uint8_t slot = 0;
+#endif
+#ifdef FREQENCY_METHOD_2
+        uint16_t edgeInterrupts[2] = {0,0};
+        uint16_t overflowInterrupts[2] = {0,0};
+#endif
+
+#endif
 
 
 
