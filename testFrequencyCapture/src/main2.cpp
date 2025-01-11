@@ -15,22 +15,25 @@
  *  50 cycles.  Accuracy after tuning the internal oscillator measured at +-0.2%., ie 2 RPM at 1K RPM.
  * 
  *  Measurements are stable and as accurate as the clock is.
-     blocking:edgeInterrupts:1042 overflowInterrupts:4 edges:45 ticks:12524 overflows:0 frequency:998.0837 RPM:1996
-    blocking:edgeInterrupts:1038 overflowInterrupts:4 edges:33 ticks:12527 overflows:0 frequency:997.8447 RPM:1996
-    blocking:edgeInterrupts:1036 overflowInterrupts:4 edges:19 ticks:12528 overflows:0 frequency:997.7650 RPM:1996
-    blocking:edgeInterrupts:1039 overflowInterrupts:4 edges:8 ticks:12527 overflows:0 frequency:997.8447 RPM:1996
-    blocking:edgeInterrupts:1037 overflowInterrupts:4 edges:45 ticks:12527 overflows:1 frequency:997.8447 RPM:1996
-    blocking:edgeInterrupts:1035 overflowInterrupts:4 edges:30 ticks:12525 overflows:1 frequency:998.0040 RPM:1996
-    blocking:edgeInterrupts:1041 overflowInterrupts:4 edges:21 ticks:12523 overflows:1 frequency:998.1634 RPM:1996
-non blocking:edgeInterrupts:1040 overflowInterrupts:4 edges:11 ticks:12522 overflows:0 frequency:998.2431 RPM:1996
-non blocking:edgeInterrupts:1012 overflowInterrupts:3 edges:23 ticks:12527 overflows:0 frequency:997.8447 RPM:1996
-non blocking:edgeInterrupts:1012 overflowInterrupts:4 edges:35 ticks:12526 overflows:0 frequency:997.9243 RPM:1996
-non blocking:edgeInterrupts:1012 overflowInterrupts:4 edges:47 ticks:12527 overflows:0 frequency:997.8447 RPM:1996
-non blocking:edgeInterrupts:1019 overflowInterrupts:4 edges:16 ticks:12530 overflows:0 frequency:997.6058 RPM:1995
-non blocking:edgeInterrupts:1014 overflowInterrupts:4 edges:30 ticks:12525 overflows:0 frequency:998.0040 RPM:1996
-non blocking:edgeInterrupts:1010 overflowInterrupts:3 edges:40 ticks:12528 overflows:0 frequency:997.7650 RPM:1996
-non blocking:edgeInterrupts:1015 overflowInterrupts:4 edges:5 ticks:12525 overflows:0 frequency:998.0040 RPM:1996
-non blocking:edgeInterrupts:1009 overflowInterrupts:4 edges:14 ticks:12527 overflows:0 frequency:997.8447 RPM:1996
+    blocking:edgeInterrupts:1028 overflowInterrupts:3 ticks:12525 overflows:0 frequency:998.0040 RPM:1996
+    blocking:edgeInterrupts:1034 overflowInterrupts:4 ticks:12524 overflows:0 frequency:998.0837 RPM:1996
+    blocking:edgeInterrupts:1033 overflowInterrupts:4 ticks:12527 overflows:0 frequency:997.8447 RPM:1996
+    blocking:edgeInterrupts:1036 overflowInterrupts:4 ticks:12528 overflows:0 frequency:997.7650 RPM:1996
+    blocking:edgeInterrupts:1035 overflowInterrupts:4 ticks:12528 overflows:0 frequency:997.7650 RPM:1996
+    blocking:edgeInterrupts:1033 overflowInterrupts:4 ticks:12527 overflows:1 frequency:997.8447 RPM:1996
+    blocking:edgeInterrupts:1033 overflowInterrupts:4 ticks:12529 overflows:1 frequency:997.6854 RPM:1995
+    blocking:edgeInterrupts:1036 overflowInterrupts:4 ticks:12527 overflows:1 frequency:997.8447 RPM:1996
+    blocking:edgeInterrupts:1036 overflowInterrupts:4 ticks:12528 overflows:1 frequency:997.7650 RPM:1996
+    blocking:edgeInterrupts:1035 overflowInterrupts:3 ticks:12530 overflows:0 frequency:997.6058 RPM:1995
+non blocking:edgeInterrupts:1034 overflowInterrupts:4 ticks:12526 overflows:0 frequency:997.9243 RPM:1996
+non blocking:edgeInterrupts:1008 overflowInterrupts:4 ticks:12526 overflows:0 frequency:997.9243 RPM:1996
+non blocking:edgeInterrupts:1014 overflowInterrupts:4 ticks:12528 overflows:0 frequency:997.7650 RPM:1996
+non blocking:edgeInterrupts:1014 overflowInterrupts:4 ticks:12530 overflows:0 frequency:997.6058 RPM:1995
+non blocking:edgeInterrupts:1012 overflowInterrupts:4 ticks:12526 overflows:1 frequency:997.9243 RPM:1996
+non blocking:edgeInterrupts:1011 overflowInterrupts:3 ticks:12526 overflows:0 frequency:997.9243 RPM:1996
+non blocking:edgeInterrupts:1014 overflowInterrupts:4 ticks:12525 overflows:0 frequency:998.0040 RPM:1996
+non blocking:edgeInterrupts:1010 overflowInterrupts:4 ticks:12524 overflows:0 frequency:998.0837 RPM:1996
+non blocking:edgeInterrupts:1011 overflowInterrupts:4 ticks:12526 overflows:0 frequency:997.9243 RPM:1996
 
  *
  */
