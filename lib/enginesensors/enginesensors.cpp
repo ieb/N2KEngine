@@ -254,7 +254,7 @@ void EngineSensors::read() {
     lastFlywheelReadTime = now;
     readEngineRPM();
   }
-  localStorage.saveEngineHours();
+  saveEngineHours();
 }
 
 
