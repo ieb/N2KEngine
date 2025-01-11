@@ -11,9 +11,21 @@ eg calling delay results in very bad readings indicating interference with the t
 
 TL;DR doesnt work on a attiny well enough to really use... odd as its the method in the
 datasheet. See main2.cpp which does look stable and accurate.
+
+
+output , at a verified stable and noise free 1KHz signal shows the measurements are not stable.
+
+Timer capture: 16032 edges: 11691  Frequency: 998.00396  RPM: 1996
+Timer capture: 16033 edges: 12199  Frequency: 997.94177  RPM: 1996
+Timer capture: 16033 edges: 12709  Frequency: 997.94177  RPM: 1996
+Timer capture: 16061 edges: 13220  Frequency: 996.20196  RPM: 1992
+Timer capture: 16039 edges: 13727  Frequency: 997.56842  RPM: 1995
+Timer capture: 16048 edges: 14231  Frequency: 997.00897  RPM: 1994
+
+
 */
 
-
+#ifdef USE_FREQUENCY_CAPTURE
 
 
 
@@ -52,18 +64,19 @@ void loop () {
   if ( ticks > 4000 && currentEdges != lastEdges) {
     lastEdges = currentEdges;    
 
-
+    double frequency = ((double)F_CPU/(double)ticks);
     Serial.print("Timer capture: ");
     Serial.print(ticks);
-    Serial.print("edges: ");
+    Serial.print(" edges: ");
     Serial.print(currentEdges);
     Serial.print("  Frequency: ");
-    Serial.print(F_CPU/ticks);
-    Serial.println(" Hz");
+    Serial.print(frequency,5);
+    Serial.print("  RPM: ");
+    Serial.println(round(frequency*2.0));
   } else {
     Serial.println("  Frequency: 0Hz ");
   }
-  delay(500);
+  delay(1000);
 }
 
 ISR (TCB0_INT_vect) {
@@ -73,3 +86,5 @@ ISR (TCB0_INT_vect) {
   edges++;
   timer_capture = TCB0_CCMP;
 }
+
+#endif
