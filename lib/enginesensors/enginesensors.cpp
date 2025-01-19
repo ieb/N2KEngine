@@ -220,18 +220,6 @@ const int16_t tcurveNMF5210K[] PROGMEM= {
 
 
 
-#ifdef DEBUGON
-#define DEBUG(x) Serial.print(x)
-#define DEBUGLN(x) Serial.println(x)
-#define INFO(x)  Serial.print(x)
-#define INFOLN(x) Serial.println(x)
-#else
-#define DEBUG(x)
-#define DEBUGLN(x)
-#define INFO(x)
-#define INFOLN(x)
-#endif
-
 
 
 extern void setupTimerFrequencyMeasurement(uint8_t flywheelPin);
@@ -240,6 +228,7 @@ extern void setupAdc();
 bool EngineSensors::begin() {
   localStorage.loadEngineHours();
   localStorage.loadVdd();
+  eepromWritten = true;
 
   setupTimerFrequencyMeasurement(flywheelPin);
 
@@ -248,11 +237,11 @@ bool EngineSensors::begin() {
   return true;
 }
 
-void EngineSensors::read() {
+void EngineSensors::read(bool outputDebug) {
   unsigned long now = millis();
   if ( now-lastFlywheelReadTime > flywheelReadPeriod) {
     lastFlywheelReadTime = now;
-    readEngineRPM();
+    readEngineRPM(outputDebug);
   }
   saveEngineHours();
 }
@@ -262,6 +251,7 @@ void EngineSensors::read() {
 
 void EngineSensors::setStoredVddVoltage(double measuredVddVoltage) {
   localStorage.setVdd(measuredVddVoltage);
+  eepromWritten = true;
 }
 
 double EngineSensors::getStoredVddVoltage() {
@@ -272,6 +262,7 @@ double EngineSensors::getStoredVddVoltage() {
 void EngineSensors::setEngineSeconds(double seconds) {
   localStorage.engineHoursPeriods = seconds/15L;
   localStorage.saveEngineHours();
+  eepromWritten = true;
 }
 
 double EngineSensors::getEngineSeconds() {  
@@ -298,7 +289,9 @@ void EngineSensors::saveEngineHours() {
     } else if ( now-lastEngineHoursTick > ENGINE_HOURS_PERIOD_MS ) {
       lastEngineHoursTick = now;
       localStorage.engineHoursPeriods++;
+
       localStorage.saveEngineHours();
+      eepromWritten = true;
     }
   } else {
     if ( engineRPM > 0 ) {
@@ -338,7 +331,9 @@ double EngineSensors::getFuelLevel(uint8_t adc, bool outputDebug) {
     // powered by VDD so no can read relative to VDD.
     int16_t adcReading =  READ_ADC(adc);
     if ( CHECK_ADC((adcReading))) {
-        DEBUGLN("adc error");
+        if (outputDebug) {
+          Serial.println(F("adc error"));
+        }
         return SNMEA2000::n2kDoubleNA;
     } 
 
@@ -355,7 +350,6 @@ double EngineSensors::getFuelLevel(uint8_t adc, bool outputDebug) {
 
 
     // the restances may be out of spec so deal with > 100 or < 0.
-    DEBUGLN(fuelReading);
     if ( fuelReading < 10 ) {
       SET_BIT(status2, ENGINE_STATUS2_WARN_1);
     } else {
@@ -384,7 +378,9 @@ uint16_t EngineSensors::getEngineStatus2() {
 double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
     int16_t adcReading =  READ_ADC(adc);
     if ( CHECK_ADC((adcReading))) {
-        DEBUGLN("adc error");
+        if (outputDebug) {
+          Serial.println(F("adc error"));
+        }
         return SNMEA2000::n2kDoubleNA;
     } 
     double measuredVoltage = localStorage.vdd*((double)adcReading/(double)RESOLUTION_BITS);
@@ -425,19 +421,25 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
 double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t batteryAdc, bool outputDebug) {
   // probably need a long to do this calc
     // need 32 bits, 1024*1024 = 1M
-    DEBUG(F("Coolant:"));
+    if (outputDebug) {
+      Serial.print(F("Coolant:"));
+    }
     // TODO 
 
     // powered by 12v so need to read 12v and scale
     int16_t coolantSupply =  READ_ADC(batteryAdc);
     if ( CHECK_ADC((coolantSupply))) { 
-        DEBUGLN("adc error"); 
+        if (outputDebug) {
+          Serial.println(F("adc error"));
+        } 
         return SNMEA2000::n2kDoubleNA; 
     } 
 
     int16_t coolantReading =  READ_ADC(coolantAdc);
     if ( CHECK_ADC((coolantReading))) {
-        DEBUGLN("adc error");
+        if (outputDebug) {
+          Serial.println(F("adc error"));
+        } 
         return SNMEA2000::n2kDoubleNA;
     } 
 
@@ -449,7 +451,9 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
 
 
     if ( coolantSupply < COOLANT_SUPPLY_ADC_5V) {
-      DEBUGLN(F("no power"));
+      if (outputDebug) {
+        Serial.println(F("no power"));
+      } 
       return SNMEA2000::n2kDoubleNA;
     }
     // both will be scaled by VDD errors and so those errors cancel out
@@ -507,7 +511,9 @@ double EngineSensors::getVoltage(uint8_t adc, bool outputDebug) {
 
   int16_t adcReading =  READ_ADC(adc);
   if ( CHECK_ADC((adcReading))) {
-      DEBUGLN("adc error");
+      if (outputDebug) {
+        Serial.println(F("adc error"));
+      } 
       return SNMEA2000::n2kDoubleNA;
   } 
 
@@ -544,7 +550,9 @@ double EngineSensors::getTemperatureK(uint8_t adc, bool outputDebug) {
   // The ntcReading is relative to VDD which also supplies the NTC, so no scaling required.
   int16_t ntcReading =  READ_ADC(adc);
   if ( CHECK_ADC((ntcReading))) {
-      DEBUGLN("adc error");
+      if (outputDebug) {
+        Serial.println(F("adc error"));
+      } 
       return SNMEA2000::n2kDoubleNA;
   } 
 

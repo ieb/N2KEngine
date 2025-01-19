@@ -5,7 +5,7 @@
 
 
 // read frequencies
-#define DEFAULT_FLYWHEEL_READ_PERIOD 1000
+#define DEFAULT_FLYWHEEL_READ_PERIOD 500
 
 // Engine hours resolution
 #define ENGINE_HOURS_PERIOD_MS 15000
@@ -103,7 +103,7 @@ class EngineSensors {
                      {
                      };
        bool begin();
-       void read();
+       void read(bool outoutDebug=false);
        bool isEngineRunning();
        void saveEngineHours();
        void setEngineSeconds(double seconds);
@@ -123,12 +123,11 @@ class EngineSensors {
 
        void setStoredVddVoltage(double measuredVddVoltage);
        double getStoredVddVoltage();
-        void readEngineRPM();
+        void readEngineRPM(bool outoutDebug=false);
 
 
        uint16_t getEngineStatus1();
        uint16_t getEngineStatus2();
-       bool debug = false;
 
     private:
         void loadEngineHours();
@@ -166,9 +165,7 @@ class EngineSensors {
 #endif
 
 #endif
-
-
-
+        bool eepromWritten = false;
         unsigned long lastFlywheelReadTime = 0;
         unsigned long lastEngineHoursTick = 0; 
 };

@@ -1311,6 +1311,9 @@
   (junction (at 121.92 63.5) (diameter 0) (color 0 0 0 0)
     (uuid a7ded870-a9a7-4ed4-bf72-02704c9fe0c7)
   )
+  (junction (at 198.755 142.875) (diameter 0) (color 0 0 0 0)
+    (uuid a842b221-bd76-424e-97ee-0de09c40cda7)
+  )
   (junction (at 33.02 23.495) (diameter 0) (color 0 0 0 0)
     (uuid b22e61ca-aa8d-4059-aacf-22176993bcd0)
   )
@@ -1397,6 +1400,10 @@
     (stroke (width 0) (type default))
     (uuid 169c2a31-68e8-40fe-9c67-8d28eb107d3e)
   )
+  (wire (pts (xy 193.675 127) (xy 198.755 127))
+    (stroke (width 0) (type default))
+    (uuid 1805ac33-2cd6-441a-8030-b11a771d751e)
+  )
   (wire (pts (xy 29.21 28.575) (xy 29.21 32.385))
     (stroke (width 0) (type default))
     (uuid 197cd379-46fe-4fe2-b365-9716f4d2d247)
@@ -1440,6 +1447,10 @@
   (wire (pts (xy 150.495 18.415) (xy 150.495 21.59))
     (stroke (width 0) (type default))
     (uuid 2d651f59-f2a2-4355-a91b-7ed1a44cbcbb)
+  )
+  (wire (pts (xy 198.755 127) (xy 198.755 128.905))
+    (stroke (width 0) (type default))
+    (uuid 2f558fd5-a80b-4bf0-81d6-9d1abdb1b421)
   )
   (wire (pts (xy -46.355 93.98) (xy -46.355 103.505))
     (stroke (width 0) (type default))
@@ -1501,6 +1512,10 @@
     (stroke (width 0) (type default))
     (uuid 5bfd2a8c-b120-442a-9113-8c873330fcf9)
   )
+  (wire (pts (xy 215.9 140.335) (xy 223.52 140.335))
+    (stroke (width 0) (type default))
+    (uuid 5ce7a186-a658-44de-82a1-9b168b5c2764)
+  )
   (wire (pts (xy 125.73 154.94) (xy 130.81 154.94))
     (stroke (width 0) (type default))
     (uuid 5d1f9252-7067-4ff4-9f27-b1891b7878f2)
@@ -1520,6 +1535,10 @@
   (wire (pts (xy 193.04 39.37) (xy 179.705 39.37))
     (stroke (width 0) (type default))
     (uuid 600734f5-f97b-479b-beb4-81820ac232c7)
+  )
+  (wire (pts (xy 177.8 146.685) (xy 177.8 152.4))
+    (stroke (width 0) (type default))
+    (uuid 61d1b511-9135-4b74-a58b-17c875f6e42d)
   )
   (wire (pts (xy 33.02 23.495) (xy 42.545 23.495))
     (stroke (width 0) (type default))
@@ -1581,6 +1600,10 @@
     (stroke (width 0) (type default))
     (uuid 7e5a259d-b157-4372-9070-8608e95b9009)
   )
+  (wire (pts (xy 198.755 136.525) (xy 198.755 142.875))
+    (stroke (width 0) (type default))
+    (uuid 7fb58910-a949-45df-91ff-6e0c9fc8a52b)
+  )
   (wire (pts (xy 100.33 83.82) (xy 90.805 83.82))
     (stroke (width 0) (type default))
     (uuid 803c9f96-8791-45f7-9d99-24b03b3b1a11)
@@ -1588,6 +1611,10 @@
   (wire (pts (xy 109.855 76.2) (xy 113.03 76.2))
     (stroke (width 0) (type default))
     (uuid 8269c37b-89e1-42b6-885b-ce748092c58a)
+  )
+  (wire (pts (xy 177.8 152.4) (xy 182.88 152.4))
+    (stroke (width 0) (type default))
+    (uuid 835bf2b9-71aa-4e23-a6b8-62b142288397)
   )
   (wire (pts (xy 83.82 176.53) (xy 85.725 176.53))
     (stroke (width 0) (type default))
@@ -1632,10 +1659,6 @@
   (wire (pts (xy 142.875 109.855) (xy 147.955 109.855))
     (stroke (width 0) (type default))
     (uuid 96296160-a3a7-4bb3-ba34-c31cd8f893ca)
-  )
-  (wire (pts (xy 215.9 140.335) (xy 223.52 140.335))
-    (stroke (width 0) (type default))
-    (uuid 980f450d-f1cc-4e72-ae95-7980c9d18052)
   )
   (wire (pts (xy 42.545 23.495) (xy 48.895 23.495))
     (stroke (width 0) (type default))
@@ -1713,7 +1736,7 @@
     (stroke (width 0) (type default))
     (uuid c080c167-ad69-40d3-bea0-048d00d1a4d0)
   )
-  (wire (pts (xy 196.85 142.875) (xy 200.66 142.875))
+  (wire (pts (xy 196.85 142.875) (xy 198.755 142.875))
     (stroke (width 0) (type default))
     (uuid c35da640-73c8-4171-b6e1-a301e8374a01)
   )
@@ -1728,6 +1751,14 @@
   (wire (pts (xy 45.72 161.925) (xy 45.72 165.1))
     (stroke (width 0) (type default))
     (uuid ce9e7ab7-8553-46f7-8633-a9f5f0cef899)
+  )
+  (wire (pts (xy 177.8 135.89) (xy 182.88 135.89))
+    (stroke (width 0) (type default))
+    (uuid d20db86d-3aa4-4363-b598-303b6462500e)
+  )
+  (wire (pts (xy 177.8 139.065) (xy 177.8 135.89))
+    (stroke (width 0) (type default))
+    (uuid d21eb7fe-ca13-45b3-8b37-ca919f4bf468)
   )
   (wire (pts (xy 240.03 140.335) (xy 231.14 140.335))
     (stroke (width 0) (type default))
@@ -1773,6 +1804,10 @@
     (stroke (width 0) (type default))
     (uuid f1596d07-aed1-4da0-8a96-170e6a3f7ae7)
   )
+  (wire (pts (xy 198.755 142.875) (xy 200.66 142.875))
+    (stroke (width 0) (type default))
+    (uuid f1c49b7d-f618-4991-9db7-affd3c881062)
+  )
   (wire (pts (xy 158.75 152.4) (xy 158.75 153.035))
     (stroke (width 0) (type default))
     (uuid fd5664fd-3416-4499-b02a-f2ba33770f2d)
@@ -1810,10 +1845,6 @@
   (text "Reset pull to gnd. Removed as not used." (at 100.33 175.895 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid 53a3a483-e73a-43b0-b74f-c46352e5b80c)
-  )
-  (text "Pin configured with pullup" (at 191.77 131.445 0)
-    (effects (font (size 1.27 1.27)) (justify left bottom))
-    (uuid 5a8b8769-ed8d-488e-bfb8-6eb196a1bf46)
   )
   (text "Fuel level" (at 65.405 120.015 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
@@ -1875,6 +1906,10 @@
   (text "D6" (at 61.595 153.035 0)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid fc5b8ea2-b2c4-47ee-a1a7-5fe9339bf7ff)
+  )
+  (text "Decoupling must\nbe close to the LM393" (at 168.275 133.985 0)
+    (effects (font (size 1.27 1.27)) (justify left bottom))
+    (uuid ff858f18-8664-4907-8735-89d20db64aef)
   )
 
   (global_label "SCK" (shape input) (at -31.115 116.205 0) (fields_autoplaced)
@@ -2168,6 +2203,13 @@
     (effects (font (size 1.27 1.27)) (justify right))
     (uuid 77d83e34-8e70-4d19-82cd-7b66a9146949)
     (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 132.9653 165.1 0)
+      (effects (font (size 1.27 1.27)) (justify right) hide)
+    )
+  )
+  (global_label "5V" (shape input) (at 193.675 127 180) (fields_autoplaced)
+    (effects (font (size 1.27 1.27)) (justify right))
+    (uuid 7965488c-2ddc-4d1b-88f3-0645a634ab55)
+    (property "Intersheetrefs" "${INTERSHEET_REFS}" (at 188.3917 127 0)
       (effects (font (size 1.27 1.27)) (justify right) hide)
     )
   )
@@ -2532,7 +2574,7 @@
     )
     (pin "1" (uuid 4933644f-9ac2-4cf7-ac06-735a31e3edc7))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR019") (unit 1)
         )
@@ -2557,7 +2599,7 @@
     )
     (pin "1" (uuid 6970d629-e4b4-4d96-ad1b-b87532e82bee))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR03") (unit 1)
         )
@@ -2586,7 +2628,7 @@
     (pin "1" (uuid 1b037360-7dc0-40d9-b7eb-0491f90851dc))
     (pin "2" (uuid 95706674-c537-4c31-9969-ea91bd084ad7))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R26") (unit 1)
         )
@@ -2615,7 +2657,7 @@
     (pin "1" (uuid 11745997-dcf0-46ae-9823-013f86839c37))
     (pin "2" (uuid 91852a9d-eb87-4e2b-a22e-88cd70c506e6))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C5") (unit 1)
         )
@@ -2644,7 +2686,7 @@
     (pin "1" (uuid 11384600-cdc0-4aaa-af4a-23ab62f8a935))
     (pin "2" (uuid 9fb3961b-def6-4f29-b1d0-35cb03bdfbca))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R15") (unit 1)
         )
@@ -2669,7 +2711,7 @@
     )
     (pin "1" (uuid e10a4978-b662-4209-a2ec-c3538dae9d47))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR012") (unit 1)
         )
@@ -2694,7 +2736,7 @@
     )
     (pin "1" (uuid 6407e746-861e-4a7c-9756-c734d3cfe47d))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR030") (unit 1)
         )
@@ -2719,7 +2761,7 @@
     )
     (pin "1" (uuid ea912806-4b72-402f-ba37-0793551c7f22))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR036") (unit 1)
         )
@@ -2754,7 +2796,7 @@
     (pin "1" (uuid 15c0f4bb-a12a-4af1-bb84-8f1a356418c6))
     (pin "2" (uuid bca15712-d6b9-449c-879a-125b1a103b55))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "D4") (unit 1)
         )
@@ -2779,7 +2821,7 @@
     )
     (pin "1" (uuid ec7d1b61-308c-4b67-9b77-360912ac196d))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR028") (unit 1)
         )
@@ -2814,7 +2856,7 @@
     (pin "1" (uuid 29b4b0bc-369b-43e4-a084-c0166145fdb7))
     (pin "2" (uuid 5d4a5a24-e79e-4f80-86a8-25fb283a92eb))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "D3") (unit 1)
         )
@@ -2843,7 +2885,7 @@
     (pin "1" (uuid 3926001f-6d23-4b7e-b721-b614e2ac7782))
     (pin "2" (uuid 31cee062-f22b-4397-92a9-278cd84012b5))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R14") (unit 1)
         )
@@ -2868,7 +2910,7 @@
     )
     (pin "1" (uuid 0f7c2246-a94d-4142-bd9b-17ec26f377e7))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR022") (unit 1)
         )
@@ -2893,7 +2935,7 @@
     )
     (pin "1" (uuid 4b558828-3017-4530-b337-a55765375ddc))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR045") (unit 1)
         )
@@ -2922,7 +2964,7 @@
     (pin "1" (uuid b1542282-8a59-40b6-9bce-65348c25accf))
     (pin "2" (uuid 0a8b074a-25e8-48b3-8d08-475417b613ae))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J8") (unit 1)
         )
@@ -2957,7 +2999,7 @@
     (pin "1" (uuid 8a37c5b9-02cf-40b6-9bb9-4f3e63413ac0))
     (pin "2" (uuid 4765ed29-d91b-4268-a479-fa6bf77937c6))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "D8") (unit 1)
         )
@@ -2987,7 +3029,7 @@
     (pin "2" (uuid 8f5bd29a-423c-46a3-9527-83c2af210a49))
     (pin "3" (uuid 885721a1-092b-4a7d-89eb-c0afe5928fcb))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "U6") (unit 1)
         )
@@ -3022,7 +3064,7 @@
     (pin "1" (uuid 87ece973-71c8-41dc-aef9-d9fd34e29bd5))
     (pin "2" (uuid 590ffc69-5e6d-47ca-947a-f9228d7aadfe))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "D7") (unit 1)
         )
@@ -3051,7 +3093,7 @@
     (pin "1" (uuid 6c11555f-15ab-4e90-9cb5-90781fa28ff2))
     (pin "2" (uuid 38a76dde-c0cf-48fb-bf52-f3021bd70918))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "D2") (unit 1)
         )
@@ -3080,7 +3122,7 @@
     (pin "1" (uuid 811e33bf-dccd-4a4c-9986-5a5fb60a44d3))
     (pin "2" (uuid 29f672e4-1924-43c1-8f33-b331758c4130))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R11") (unit 1)
         )
@@ -3105,7 +3147,7 @@
     )
     (pin "1" (uuid 330718d1-cabd-41a7-bef5-66b032299656))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR02") (unit 1)
         )
@@ -3134,7 +3176,7 @@
     (pin "1" (uuid 39137b1d-41ea-437e-acb4-7594302f8c43))
     (pin "2" (uuid 1285b831-802a-4c8d-8241-6517da1b9554))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R1") (unit 1)
         )
@@ -3163,7 +3205,7 @@
     (pin "1" (uuid 32771607-5fa2-4f4f-918d-598b459a4517))
     (pin "2" (uuid 561876b6-b3d9-435c-bed2-fb3914fb344d))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C22") (unit 1)
         )
@@ -3192,7 +3234,7 @@
     (pin "1" (uuid c616fc69-c128-4a9a-94cd-0dc0d7fe8662))
     (pin "2" (uuid c59b8be3-946e-4663-86a3-7aae5a102a8a))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C23") (unit 1)
         )
@@ -3221,7 +3263,7 @@
     (pin "1" (uuid d43e07a4-dd7d-4e64-b6d5-c0a78e405aa6))
     (pin "2" (uuid e7bdd140-1d70-4be7-9d8f-bd57c5cf482f))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R22") (unit 1)
         )
@@ -3246,7 +3288,7 @@
     )
     (pin "1" (uuid d765da1c-fbf3-41e3-b872-e3c96767c7ff))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR018") (unit 1)
         )
@@ -3271,7 +3313,7 @@
     )
     (pin "1" (uuid d8d7c0bf-0b6a-4419-b1ba-b48f689ca84f))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR037") (unit 1)
         )
@@ -3300,7 +3342,7 @@
     (pin "1" (uuid d1438b72-5e35-4787-aeef-535295339d32))
     (pin "2" (uuid 330e1f4e-86e1-46ed-ba0e-0e6ff25d22f8))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C12") (unit 1)
         )
@@ -3329,7 +3371,7 @@
     (pin "1" (uuid 795348c1-4939-460e-abee-fd17a90bae64))
     (pin "2" (uuid 37811f06-ad11-47a5-a70a-eb13fef5ee7f))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R16") (unit 1)
         )
@@ -3364,7 +3406,7 @@
     (pin "1" (uuid c271005b-4a3b-40a5-8696-341e1e3fb6f4))
     (pin "2" (uuid 5c4604a9-7e6a-4281-b3f3-684589f4c9e0))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "D6") (unit 1)
         )
@@ -3393,7 +3435,7 @@
     (pin "1" (uuid 595dafed-ff46-43ea-b4dc-62e7a89cd5a8))
     (pin "2" (uuid f0d6adfc-79d7-4303-89d7-b62cf71f9853))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R25") (unit 1)
         )
@@ -3425,7 +3467,7 @@
     (pin "4" (uuid c9583627-624b-4ef6-b73a-96bd27ea90b6))
     (pin "8" (uuid c73a03cb-7895-46ef-a84f-a3967c377fad))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "U2") (unit 1)
         )
@@ -3450,7 +3492,7 @@
     )
     (pin "1" (uuid 91076bf7-6e70-49aa-b645-4e249cff8bd2))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR031") (unit 1)
         )
@@ -3479,7 +3521,7 @@
     (pin "1" (uuid b6eba603-6a5f-476a-b706-c8ced5712299))
     (pin "2" (uuid f329c778-1400-4b05-97ca-4a1b0312cba7))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J7") (unit 1)
         )
@@ -3504,7 +3546,7 @@
     )
     (pin "1" (uuid 9162a7bd-dc99-4581-9494-d34334f98296))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR040") (unit 1)
         )
@@ -3518,7 +3560,7 @@
     (property "Reference" "C11" (at 236.22 142.875 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "1uF" (at 236.22 145.415 0)
+    (property "Value" "470nF" (at 236.22 145.415 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" (at 240.9952 140.335 0)
@@ -3533,7 +3575,7 @@
     (pin "1" (uuid bbc363bf-5c15-49ae-8cb6-a2b9e48db002))
     (pin "2" (uuid 28c210d9-31e4-48fe-a0c2-438a3aa73d8a))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C11") (unit 1)
         )
@@ -3563,7 +3605,7 @@
     (pin "2" (uuid ae719c9b-f830-4159-890c-f1fb530ce823))
     (pin "3" (uuid 45d2f68b-bb66-46c0-be65-343ad9fc1f53))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J13") (unit 1)
         )
@@ -3592,7 +3634,7 @@
     (pin "1" (uuid 0685d829-7705-4d81-94a4-fbc79fe36a90))
     (pin "2" (uuid f892c432-f159-4eec-a569-098954d5f600))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R2") (unit 1)
         )
@@ -3621,7 +3663,7 @@
     (pin "1" (uuid 54077368-6e12-4bd2-8c4c-f9dc3c62d4b9))
     (pin "2" (uuid 1ac0b6d5-af88-4f7d-95b2-ed946b7cd861))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C4") (unit 1)
         )
@@ -3650,7 +3692,7 @@
     (pin "1" (uuid 40b24682-2956-4eaa-a93b-4309b637874e))
     (pin "2" (uuid 80b21cd0-d2b8-43e0-9058-9264603f68b7))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "F1") (unit 1)
         )
@@ -3675,7 +3717,7 @@
     )
     (pin "1" (uuid 1880a642-9026-447a-8397-d6cca4095dd1))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR09") (unit 1)
         )
@@ -3708,7 +3750,7 @@
     (pin "5" (uuid 9416a1cb-0617-47a8-9fe4-80e677e2f04e))
     (pin "6" (uuid 8a90cba0-1e94-4a0f-bf8c-122db08549ff))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J3") (unit 1)
         )
@@ -3737,7 +3779,7 @@
     (pin "1" (uuid 98ed1612-1f5b-4f90-81e8-f118c54662cb))
     (pin "2" (uuid 614d7787-7330-497f-8f3f-36be43153626))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J5") (unit 1)
         )
@@ -3772,7 +3814,7 @@
     (pin "1" (uuid 078cdaf3-69e4-4983-864c-c736f7bd6afc))
     (pin "2" (uuid ad3ca272-99b4-45dd-8823-ace4adfb7853))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "D5") (unit 1)
         )
@@ -3797,7 +3839,7 @@
     )
     (pin "1" (uuid f7a16fc2-e005-47b4-8eec-387268a991d5))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR04") (unit 1)
         )
@@ -3829,7 +3871,7 @@
     (pin "4" (uuid c1e68cdc-8ca5-444a-9077-127e668c6430))
     (pin "8" (uuid 1c469785-cae9-4814-b4cf-485444e577a3))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "U2") (unit 3)
         )
@@ -3864,7 +3906,7 @@
     (pin "1" (uuid 0fdb4004-03a0-4c62-ba7d-23bd547bab28))
     (pin "2" (uuid e349c67e-9913-4155-8816-1afcddad5c3d))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "D1") (unit 1)
         )
@@ -3889,7 +3931,7 @@
     )
     (pin "1" (uuid db0716bb-c490-4955-b482-9210e4cb4238))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR017") (unit 1)
         )
@@ -3918,7 +3960,7 @@
     (pin "1" (uuid d36739fc-6bb6-4772-b74e-0b737d0ce171))
     (pin "2" (uuid ebc003ae-30f3-40c9-8092-91e1b8af1936))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R18") (unit 1)
         )
@@ -3947,7 +3989,7 @@
     (pin "1" (uuid 325838bd-7271-49c3-bed5-97f8f0f934b5))
     (pin "2" (uuid d92e818a-cb3a-46fe-8e4b-7e067c8dc191))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C16") (unit 1)
         )
@@ -3976,7 +4018,7 @@
     (pin "1" (uuid 4c5c07d3-114a-4970-9068-385ffd742795))
     (pin "2" (uuid 9727d4d6-7f62-4214-9efd-129de4e8183d))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C10") (unit 1)
         )
@@ -4006,7 +4048,7 @@
     (pin "2" (uuid 22e08bd4-0283-4646-a9b4-9f7cb4b1fdc1))
     (pin "3" (uuid 78778320-fd36-4a3d-af9f-bcb74548699b))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J9") (unit 1)
         )
@@ -4035,7 +4077,7 @@
     (pin "1" (uuid 57749e2f-8f0d-44d7-acf9-305df969cdca))
     (pin "2" (uuid ae40443c-1bbb-4777-84d0-78db14070150))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C9") (unit 1)
         )
@@ -4060,7 +4102,7 @@
     )
     (pin "1" (uuid a2716a6c-3127-4bdc-a5ee-b1a12d6f08b0))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR039") (unit 1)
         )
@@ -4093,7 +4135,7 @@
     (pin "5" (uuid 7984814d-7e94-4453-81f2-04342ac9d98f))
     (pin "6" (uuid c13adb1b-35ac-4955-b9c9-65112a728ede))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J1") (unit 1)
         )
@@ -4118,7 +4160,7 @@
     )
     (pin "1" (uuid ed179b59-423d-45d0-8ce2-32b42ec9f2f7))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR048") (unit 1)
         )
@@ -4147,7 +4189,7 @@
     (pin "1" (uuid 53a6101e-2a8c-4950-9aea-ba5b6eb371da))
     (pin "2" (uuid 75080d3d-4c70-4d15-b84d-c13507998fe6))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R27") (unit 1)
         )
@@ -4172,7 +4214,7 @@
     )
     (pin "1" (uuid 5a7eac06-f09a-48c5-88d5-b34cf1b7a3bf))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR013") (unit 1)
         )
@@ -4197,7 +4239,7 @@
     )
     (pin "1" (uuid 4f8aacdb-d039-4bab-b4b6-cb4d36a4df6c))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR027") (unit 1)
         )
@@ -4257,7 +4299,7 @@
     (pin "8" (uuid ab325d87-77e5-4c64-90f3-7f632fdf61cb))
     (pin "9" (uuid f08a5de3-84ca-493f-9a80-181036b34531))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "U7") (unit 1)
         )
@@ -4282,7 +4324,7 @@
     )
     (pin "1" (uuid 6b4569e2-ac6f-46bd-946a-d0fc08960a6a))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR041") (unit 1)
         )
@@ -4311,7 +4353,7 @@
     (pin "1" (uuid 2fbab8b0-c203-4c48-b689-094cc965c13a))
     (pin "2" (uuid 2c3d4bfc-183f-4713-9227-d74e41683221))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R28") (unit 1)
         )
@@ -4336,7 +4378,7 @@
     )
     (pin "1" (uuid ee60720b-1ac7-43a0-a02f-40376b6b5e4d))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR011") (unit 1)
         )
@@ -4361,7 +4403,7 @@
     )
     (pin "1" (uuid 0408c4a8-206f-4950-a8f8-a5a487de5a0f))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR025") (unit 1)
         )
@@ -4390,7 +4432,7 @@
     (pin "1" (uuid 91553e99-099a-4e9a-820a-8daaa379ac32))
     (pin "2" (uuid 2d0369ca-35be-4552-942b-fb62ed5a54a2))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J6") (unit 1)
         )
@@ -4415,9 +4457,38 @@
     )
     (pin "1" (uuid 4583df3e-76e2-4305-bcbf-f09be8dddbba))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR042") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "Device:R") (at 198.755 132.715 0) (mirror x) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (uuid 83e24735-d713-4cec-beda-09dc0b06da22)
+    (property "Reference" "R9" (at 196.85 131.445 0)
+      (effects (font (size 1.27 1.27)) (justify right))
+    )
+    (property "Value" "10K" (at 196.85 133.985 0)
+      (effects (font (size 1.27 1.27)) (justify right))
+    )
+    (property "Footprint" "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder" (at 196.977 132.715 90)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (at 198.755 132.715 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "stock" "Y" (at 198.755 132.715 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 18a77227-49a7-4796-a5cd-3e9a67888771))
+    (pin "2" (uuid fa46bdc8-9343-44d5-9b83-fdebc62df307))
+    (instances
+      (project "attiny3226Board"
+        (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
+          (reference "R9") (unit 1)
         )
       )
     )
@@ -4440,7 +4511,7 @@
     )
     (pin "1" (uuid dbe7af1f-2b9d-4382-8d1a-bd58910f9926))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR08") (unit 1)
         )
@@ -4469,7 +4540,7 @@
     (pin "1" (uuid 710fa48d-0324-43a1-a28f-873b0191e815))
     (pin "2" (uuid d9893a0c-4544-40de-bafb-3be1c3a57655))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R17") (unit 1)
         )
@@ -4494,7 +4565,7 @@
     )
     (pin "1" (uuid 46a6f327-b9d7-4ca9-b3e9-6d9cd8e5da7d))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR05") (unit 1)
         )
@@ -4519,7 +4590,7 @@
     )
     (pin "1" (uuid 945b61c1-039c-4531-a0ee-38925149a3d4))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR033") (unit 1)
         )
@@ -4548,7 +4619,7 @@
     (pin "1" (uuid a4d65ed2-453f-4d7b-9994-269f64540f50))
     (pin "2" (uuid 165a80ae-ad05-4317-8562-1a66103ca9eb))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J2") (unit 1)
         )
@@ -4573,7 +4644,7 @@
     )
     (pin "1" (uuid 2a8bd0f9-ac01-483c-b6d6-a27252c627fc))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR06") (unit 1)
         )
@@ -4617,7 +4688,7 @@
     (pin "8" (uuid c6dbb6a7-0925-456d-9806-06948160031c))
     (pin "9" (uuid 667140e9-1846-47ee-b278-4bc02c1d2d5c))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "U3") (unit 1)
         )
@@ -4646,7 +4717,7 @@
     (pin "1" (uuid d522fc25-7166-4d42-a2bf-7a81cf6a4411))
     (pin "2" (uuid df45838d-de35-48e3-8aad-0cef18402383))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R6") (unit 1)
         )
@@ -4675,7 +4746,7 @@
     (pin "1" (uuid 952cf15a-4692-4946-af1a-e6a8efebcc6d))
     (pin "2" (uuid e18d4d0a-2815-4850-8432-c11a5132aec6))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C14") (unit 1)
         )
@@ -4704,7 +4775,7 @@
     (pin "1" (uuid 5f5db3a3-e4f8-4938-9efa-fc0f876839fe))
     (pin "2" (uuid d9fc7e3e-df38-4157-9a09-f2e07d114628))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "Y2") (unit 1)
         )
@@ -4733,7 +4804,7 @@
     (pin "1" (uuid 8d97c979-be16-4e01-a959-46f29e672425))
     (pin "2" (uuid 709f307d-a59a-4262-8587-6e9c9d5fc32f))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C20") (unit 1)
         )
@@ -4762,7 +4833,7 @@
     (pin "1" (uuid 37ac6315-bfc1-470d-a2ce-4e03f3c1981f))
     (pin "2" (uuid bbf35836-7f76-45df-b2fc-55ea8ffa71aa))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R10") (unit 1)
         )
@@ -4787,7 +4858,7 @@
     )
     (pin "1" (uuid 72368426-da04-46ca-807a-0494b69fd78c))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR044") (unit 1)
         )
@@ -4822,7 +4893,7 @@
     (pin "7" (uuid d9f1d494-617f-4bee-9272-afc046a7bd4a))
     (pin "8" (uuid d389c0d0-2076-435f-9c0a-af60c614f9df))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "U4") (unit 1)
         )
@@ -4851,7 +4922,7 @@
     (pin "1" (uuid dffe9d50-2177-4412-8d71-60c0a129dfd3))
     (pin "2" (uuid fe71dc4a-cc05-4e35-b604-46e20c6cd7f9))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R24") (unit 1)
         )
@@ -4880,7 +4951,7 @@
     (pin "1" (uuid 630b885f-0224-4368-822c-0c6a02f6929f))
     (pin "2" (uuid a3e1f70a-3d72-4c11-8ca1-af34e4d2c79e))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R23") (unit 1)
         )
@@ -4912,7 +4983,7 @@
     (pin "4" (uuid 20b0e564-c482-43fb-808a-86971007b93d))
     (pin "8" (uuid d3ef34e4-288d-4aa2-9862-e85403cb5815))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "U2") (unit 2)
         )
@@ -4941,7 +5012,7 @@
     (pin "1" (uuid fd8d92de-5c61-4ad6-b9b7-18119b699575))
     (pin "2" (uuid d6c92c92-1737-42d4-b5f9-e2252c8710e5))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R3") (unit 1)
         )
@@ -4966,7 +5037,7 @@
     )
     (pin "1" (uuid 7cf41c2f-efbd-4b28-b8ec-cdbedc058760))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR026") (unit 1)
         )
@@ -4995,7 +5066,7 @@
     (pin "1" (uuid 94b1928b-492d-457d-80e9-82c0c8e3b435))
     (pin "2" (uuid 00efec9a-ff85-4c96-b563-f5b8b8621518))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C8") (unit 1)
         )
@@ -5024,7 +5095,7 @@
     (pin "1" (uuid d3c929ae-78a2-41f8-a130-1c89eb973d57))
     (pin "2" (uuid 2118a33e-4916-4820-b440-aefa029771f3))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C18") (unit 1)
         )
@@ -5049,7 +5120,7 @@
     )
     (pin "1" (uuid 6828d2f8-9d3b-4c31-b46c-1e4b7dc01dd7))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR01") (unit 1)
         )
@@ -5074,7 +5145,7 @@
     )
     (pin "1" (uuid db5b23ce-4fc0-4d47-86f6-9c78db646fde))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR024") (unit 1)
         )
@@ -5099,7 +5170,7 @@
     )
     (pin "1" (uuid 732712f0-4ee6-4e56-8c6c-46fa10f5c407))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR014") (unit 1)
         )
@@ -5124,7 +5195,7 @@
     )
     (pin "1" (uuid a0fb2205-044f-47c2-b9df-b38e2233050b))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR020") (unit 1)
         )
@@ -5153,7 +5224,7 @@
     (pin "1" (uuid d798a283-6e70-4287-ac3f-8307930707d1))
     (pin "2" (uuid c8486c37-09ef-4752-abee-6b759f063106))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C1") (unit 1)
         )
@@ -5178,7 +5249,7 @@
     )
     (pin "1" (uuid 3669c987-9d2a-47af-a511-f43d6e301792))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR07") (unit 1)
         )
@@ -5203,7 +5274,7 @@
     )
     (pin "1" (uuid 5954e2c4-ca84-4ee6-b16f-7aa4826c10ab))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR035") (unit 1)
         )
@@ -5232,7 +5303,7 @@
     (pin "1" (uuid d9973fc9-23c6-43be-8d70-4c503fd2f4a6))
     (pin "2" (uuid e0d10500-361c-4211-b494-4a6c7ae2eb95))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R5") (unit 1)
         )
@@ -5257,7 +5328,7 @@
     )
     (pin "1" (uuid e2f1e239-e62d-439a-b9af-3b5873b06077))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR015") (unit 1)
         )
@@ -5286,7 +5357,7 @@
     (pin "1" (uuid a21fdee5-4398-4305-a413-b3fd0cdbfad6))
     (pin "2" (uuid 68e29259-9f92-4a0f-8032-466196e96584))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C21") (unit 1)
         )
@@ -5315,7 +5386,7 @@
     (pin "1" (uuid 716ee6b3-6ff1-4b3e-8738-4315ff3b51b7))
     (pin "2" (uuid 78f8b78a-7577-404e-9254-22073498ec0a))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J10") (unit 1)
         )
@@ -5340,7 +5411,7 @@
     )
     (pin "1" (uuid 85bd2e34-4607-4c2c-bfd3-a3930eab303f))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR021") (unit 1)
         )
@@ -5369,7 +5440,7 @@
     (pin "1" (uuid b6cfdd3d-ef6e-4f05-beba-974baf600530))
     (pin "2" (uuid 16bdb4c6-7bae-49e2-b8e6-057af850f29f))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C6") (unit 1)
         )
@@ -5398,7 +5469,7 @@
     (pin "1" (uuid 4ab73c81-aab0-400d-975b-19b9c2dcae44))
     (pin "2" (uuid f672535b-48c3-4edf-a9a5-c957346564bb))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R7") (unit 1)
         )
@@ -5423,7 +5494,7 @@
     )
     (pin "1" (uuid d0e8781d-909f-4553-83de-53e6efe5d034))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR034") (unit 1)
         )
@@ -5448,7 +5519,7 @@
     )
     (pin "1" (uuid be4ab37e-3e3c-40f3-994b-ce9c1513ba36))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR016") (unit 1)
         )
@@ -5477,7 +5548,7 @@
     (pin "1" (uuid fb08b517-b605-49f9-8557-acec399ed3e1))
     (pin "2" (uuid 73c1b8d6-2b46-44a3-99b9-05502355f910))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C13") (unit 1)
         )
@@ -5506,7 +5577,7 @@
     (pin "1" (uuid 5b27e31f-5b1b-45e5-851b-cecc8f4fd19e))
     (pin "2" (uuid 9e3ed240-128a-4b66-b2de-c5665a84ebf7))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J12") (unit 1)
         )
@@ -5535,7 +5606,7 @@
     (pin "1" (uuid e9a5daf3-4b9f-4544-bf0e-fa4017b0461e))
     (pin "2" (uuid 4dde5b9a-c717-4071-8f4e-8b6335d5ab44))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R19") (unit 1)
         )
@@ -5564,7 +5635,7 @@
     (pin "1" (uuid c0a6b6e3-c410-4ee0-ae5e-4e0dd6b0017c))
     (pin "2" (uuid dd28a33b-db38-4caf-b7d8-61f117567e25))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "J4") (unit 1)
         )
@@ -5593,7 +5664,7 @@
     (pin "1" (uuid 92fcf584-922b-4746-b116-e603846e4ac4))
     (pin "2" (uuid 3907c81d-b707-4b83-96c5-a7745a4ee6d0))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C7") (unit 1)
         )
@@ -5622,7 +5693,7 @@
     (pin "1" (uuid 032acf11-75a4-4696-903b-516e71b40bb8))
     (pin "2" (uuid 2b66feb7-162c-4d48-8fa4-ebfac645d9bf))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C17") (unit 1)
         )
@@ -5651,7 +5722,7 @@
     (pin "1" (uuid e36582e5-0734-43ff-9334-3be083f32a5d))
     (pin "2" (uuid a11f4007-eb5d-4894-b500-0fe4d1b288c7))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C19") (unit 1)
         )
@@ -5676,7 +5747,7 @@
     )
     (pin "1" (uuid 24401243-c86e-4c1f-9c1f-e0b103a15ddc))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR032") (unit 1)
         )
@@ -5705,7 +5776,7 @@
     (pin "1" (uuid 2fecfa29-7338-4b5e-9e10-27c0079ab28f))
     (pin "2" (uuid 8d133f3e-e1bc-4103-8022-e3abea0dda0b))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "R4") (unit 1)
         )
@@ -5730,7 +5801,7 @@
     )
     (pin "1" (uuid f76e96aa-1a04-413a-b2fc-463c960e993d))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR010") (unit 1)
         )
@@ -5759,7 +5830,7 @@
     (pin "1" (uuid 390c096c-4ac5-4b8e-9766-95c950f11aec))
     (pin "2" (uuid 1ec61fec-1783-45ad-bd93-c90273924c1a))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C3") (unit 1)
         )
@@ -5784,7 +5855,7 @@
     )
     (pin "1" (uuid 1169952b-f688-4ab0-8cd6-dd111b7a0080))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR023") (unit 1)
         )
@@ -5829,7 +5900,7 @@
     (pin "8" (uuid ad849295-36d4-4abe-89b1-40db57eed8a6))
     (pin "9" (uuid c57654f3-88dd-4be1-ac30-76784baf6f44))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "U1") (unit 1)
         )
@@ -5858,7 +5929,7 @@
     (pin "1" (uuid b686cf8c-c00b-4abf-b8bd-6afd6e92f031))
     (pin "2" (uuid 90142ab1-f250-416f-8a20-6f55a250664c))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C15") (unit 1)
         )
@@ -5883,7 +5954,7 @@
     )
     (pin "1" (uuid ed7088b0-6470-4d58-b4ac-c72e86f0f8ca))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR043") (unit 1)
         )
@@ -5912,7 +5983,7 @@
     (pin "1" (uuid d09b0183-7692-45c9-b743-a1a7e124af14))
     (pin "2" (uuid 3502ff2e-ca42-4915-ac3e-8aade838c1e9))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "Y1") (unit 1)
         )
@@ -5941,9 +6012,38 @@
     (pin "1" (uuid ade4e8ba-8be4-4a99-9c41-9cb16d2c301d))
     (pin "2" (uuid bc95b688-a4f4-4111-9766-3431daf3bc0c))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "C2") (unit 1)
+        )
+      )
+    )
+  )
+
+  (symbol (lib_id "Device:C") (at 177.8 142.875 0) (mirror x) (unit 1)
+    (in_bom yes) (on_board yes) (dnp no) (fields_autoplaced)
+    (uuid fbfeb56a-cbf3-4711-b94d-f0d56431eed6)
+    (property "Reference" "C24" (at 173.99 141.605 0)
+      (effects (font (size 1.27 1.27)) (justify right))
+    )
+    (property "Value" "100nF" (at 173.99 144.145 0)
+      (effects (font (size 1.27 1.27)) (justify right))
+    )
+    (property "Footprint" "Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder" (at 178.7652 139.065 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "Datasheet" "~" (at 177.8 142.875 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (property "stock" "Y" (at 177.8 142.875 0)
+      (effects (font (size 1.27 1.27)) hide)
+    )
+    (pin "1" (uuid 68473faf-4a95-43e3-b206-f2e319533981))
+    (pin "2" (uuid c9f1128f-8837-42ca-a834-0ad2aed1f3dd))
+    (instances
+      (project "attiny3226Board"
+        (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
+          (reference "C24") (unit 1)
         )
       )
     )
@@ -5966,7 +6066,7 @@
     )
     (pin "1" (uuid 99fac886-8e29-4935-af26-ffaac5482faf))
     (instances
-      (project "atmel328pBoard"
+      (project "attiny3226Board"
         (path "/498aeeac-0101-43ba-845f-386b9cebf75b"
           (reference "#PWR029") (unit 1)
         )

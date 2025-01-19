@@ -65,7 +65,7 @@ void setupTimerFrequencyMeasurement(uint8_t flywheelPin) {
 
 }
 
-void EngineSensors::readEngineRPM() {
+void EngineSensors::readEngineRPM(bool outputDebug) {
 
   // copy the capture over, and the interupts, these are volatile.
   noInterrupts();
@@ -91,16 +91,18 @@ void EngineSensors::readEngineRPM() {
     + (float)smoothedRPM[3];
   engineRPM = frpm/40.0;
 
-  Serial.print(F("RPM pulses :"));
-  Serial.print(ticks);
-  Serial.print(F(" interupts:"));
-  Serial.print(nInterrupts);
-  Serial.print(F(" Hz:"));
-  Serial.print(frequency);
-  Serial.print(F(" Hz:"));
-  Serial.print(nInterrupts*2);
-  Serial.print(F(" RPM:"));
-  Serial.println(engineRPM);
+  if ( outputDebug ) {
+    Serial.print(F("RPM pulses :"));
+    Serial.print(ticks);
+    Serial.print(F(" interupts:"));
+    Serial.print(nInterrupts);
+    Serial.print(F(" Hz:"));
+    Serial.print(frequency);
+    Serial.print(F(" Hz:"));
+    Serial.print(nInterrupts*2);
+    Serial.print(F(" RPM:"));
+    Serial.println(engineRPM);    
+  }
 }
 
 #endif

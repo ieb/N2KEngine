@@ -87,7 +87,7 @@ void setupTimerFrequencyMeasurement(uint8_t flywheelPin) {
 
 
 
-void EngineSensors::readEngineRPM() {
+void EngineSensors::readEngineRPM(bool outputDebug) {
 
   noInterrupts();
   uint8_t l = 0, p = 1;
@@ -109,25 +109,38 @@ void EngineSensors::readEngineRPM() {
 
 
   double frequency = 0;
-  if ( nEdgeInterrupts > 200 && overflows < 2) {
+  // ignore noise at over 4KHz (ie 8KRPM) indicated ( ticks > 3000)
+  // and ignore where not enough pulses have been seen (nEdgeInterupts > 150)
+  if ( nEdgeInterrupts > 150 && overflows < 2 && ticks > 3000) {
     frequency = 50.0*250000.0/(double) ticks;
-    Serial.print("edges:");
+    if ( outputDebug ) {
+      Serial.print(F("valid   "));
+    }
+  } else {
+    if ( outputDebug ) {
+      Serial.print(F("invalid "));
+    }
+  }
+  if ( outputDebug ) {
+    Serial.print(F(" edges:"));
     Serial.print(edgesL);
-    Serial.print(" ticks:");
-    Serial.print(ticks);
+    Serial.print(F(" ticks:"));
+    Serial.print(ticks);      
   }
   engineRPM = round(frequency*2.0);
 
-  Serial.print(" edgeInterrupts:");
-  Serial.print(nEdgeInterrupts);
-  Serial.print(" overflowInterrupts:");
-  Serial.print(nOverflowInterrupts);
-  Serial.print(" overflows:");
-  Serial.print(overflows);
-  Serial.print(" frequency:");
-  Serial.print(frequency,4);
-  Serial.print(" RPM:");
-  Serial.println(round(frequency*2.0));
+  if ( outputDebug ) {
+    Serial.print(F(" edgeInterrupts:"));
+    Serial.print(nEdgeInterrupts);
+    Serial.print(F(" overflowInterrupts:"));
+    Serial.print(nOverflowInterrupts);
+    Serial.print(F(" overflows:"));
+    Serial.print(overflows);
+    Serial.print(F(" frequency:"));
+    Serial.print(frequency,4);
+    Serial.print(F(" RPM:"));
+    Serial.println(round(frequency*2.0));
+  }
 
 }
 

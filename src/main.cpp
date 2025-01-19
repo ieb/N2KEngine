@@ -75,10 +75,10 @@
 
 #define DEVICE_ADDRESS 24
 
+bool sensorDebug = false;
 
 EngineSensors sensors(PIN_FLYWHEEL);
 
-#ifndef BISECT
 
 const SNMEA2000ProductInfo productInfomation PROGMEM={
                                        1300,                        // N2kVersion
@@ -129,7 +129,6 @@ EngineMonitor engineMonitor = EngineMonitor(DEVICE_ADDRESS,
 OneWire oneWire(PIN_ONE_WIRE);
 OneWireSensors oneWireSensor(&oneWire);
 
-#endif
 
 #ifdef LED_PIN
 void toggleLed() {
@@ -165,7 +164,6 @@ void toggleLed(){};
 void blinkLed(int n){};
 #endif
 
-#ifndef BISECT
 
 
 /**
@@ -283,18 +281,18 @@ void printN2K(double v, double fact, double offset) {
 }
 
 void showStatus() {
-  sensors.debug = true;
   Serial.print(F("CPU Vdd   : "));Serial.println(sensors.getStoredVddVoltage());
   Serial.print(F("Free mem  : "));Serial.println(freeMemory());
-  Serial.print(F("Exhaust T : "));printN2K(sensors.getTemperatureK(ADC_EXHAUST_NTC1), 1.0,273.15);
-  Serial.print(F("Alt T     : "));printN2K(sensors.getTemperatureK(ADC_ALTERNATOR_NTC2),1.0, 273.15);
-  Serial.print(F("Room T    : "));printN2K(sensors.getTemperatureK(ADC_ENGINEROOM_NTC3),1.0,273.15);
-  Serial.print(F("Fuel      : "));printN2K(sensors.getFuelLevel(ADC_FUEL_SENSOR),1.0,0);
-  Serial.print(F("Engine V  : "));printN2K(sensors.getVoltage(ADC_ENGINEBATTERY),1.0,0);
-  Serial.print(F("Alt V     : "));printN2K(sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE),1.0,0);
+  Serial.print(F("Exhaust T : "));printN2K(sensors.getTemperatureK(ADC_EXHAUST_NTC1, sensorDebug), 1.0,273.15);
+  Serial.print(F("Alt T     : "));printN2K(sensors.getTemperatureK(ADC_ALTERNATOR_NTC2, sensorDebug),1.0, 273.15);
+  Serial.print(F("Room T    : "));printN2K(sensors.getTemperatureK(ADC_ENGINEROOM_NTC3, sensorDebug),1.0,273.15);
+  Serial.print(F("Fuel      : "));printN2K(sensors.getFuelLevel(ADC_FUEL_SENSOR, sensorDebug),1.0,0);
+  Serial.print(F("Engine V  : "));printN2K(sensors.getVoltage(ADC_ENGINEBATTERY, sensorDebug),1.0,0);
+  Serial.print(F("Alt V     : "));printN2K(sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE, sensorDebug),1.0,0);
   Serial.print(F("Engine h  : "));Serial.println(sensors.getEngineSeconds()/3600.0);
-  Serial.print(F("Coolant T : "));printN2K(sensors.getCoolantTemperatureK(ADC_COOLANT_TEMPERATURE, ADC_ENGINEBATTERY),1.0,273.15);
-  Serial.print(F("Oil Psi   : "));printN2K(sensors.getOilPressure(ADC_OIL_SENSOR),1.0/6894.76,0.0);
+  Serial.print(F("Coolant T : "));printN2K(sensors.getCoolantTemperatureK(ADC_COOLANT_TEMPERATURE, ADC_ENGINEBATTERY, sensorDebug),1.0,273.15);
+  Serial.print(F("Oil Psi   : "));printN2K(sensors.getOilPressure(ADC_OIL_SENSOR, sensorDebug),1.0/6894.76,0.0);
+  sensors.read(sensorDebug);
   Serial.print(F("Engine On : "));Serial.println(sensors.isEngineRunning()?"Y":"N");
   Serial.print(F("Engine RPM: "));printN2K(sensors.getEngineRPM(),1.0,0);
   uint8_t maxActiveDevices = oneWireSensor.getMaxActiveDevice();
@@ -317,7 +315,6 @@ void showStatus() {
   Serial.print(F("ADC_COOLANT_TEMPERATURE: "));sensors.dumpADC(ADC_COOLANT_TEMPERATURE);
   Serial.print(F("ADC_ENGINEBATTERY: "));sensors.dumpADC(ADC_ENGINEBATTERY);
 
-  sensors.debug = false;
 }
 
 
@@ -374,6 +371,7 @@ void showHelp() {
   Serial.println(F("  - Send 'F' fake Engine RPM at 1K"));
   Serial.println(F("  - Send 's' to show status"));
   Serial.println(F("  - Send 'd' to toggle N2k diagnostics"));
+  Serial.println(F("  - Send 'D' to toggle Sensor diagnostics"));
   Serial.println(F("  - Send 'R' to restart"));
 }
 
@@ -395,6 +393,9 @@ void checkCommand() {
       case 'd':
         toggleDiagnostics();
         break;
+      case 'D':
+        sensorDebug = !sensorDebug;
+        break;
       case 'V':
         setStoredVddVoltage();
         break;
@@ -407,13 +408,11 @@ void checkCommand() {
   }
 }
 
-#endif
 
 void setup() {
   Serial.begin(19200);
   Serial.println(F("Luna engine monitor start"));
   setupLed();
-#ifndef BISECT
   Serial.println(F("Opening CAN"));
   while (!engineMonitor.open(MCP_16MHz) ) {
     Serial.println(F("Failed to start NMEA2000, retry in 5s or check wiring pins"));
@@ -421,7 +420,6 @@ void setup() {
     blinkLed(2);
   }
   Serial.println(F("Opened, MCP2515 Operational"));
-#endif
 
   while(!sensors.begin() ) {
     Serial.println(F("Failed to start Engine Sensors, retry in 5s"));
@@ -430,17 +428,14 @@ void setup() {
   }
 
   Serial.println(F("Starting one wire"));
-#ifndef BISECT
   oneWireSensor.begin();
-#endif
   blinkLed(4);
 
   Serial.println(F("Running..."));;
 }
 
 void loop() {
-  sensors.read();
-#ifndef BISECT
+  sensors.read(sensorDebug);
   asyncBlink();
   oneWireSensor.readOneWire();
   sendRapidEngineData();
@@ -450,10 +445,6 @@ void loop() {
   sendFuel();
   engineMonitor.processMessages();
   checkCommand();
-#else
-//  sensors.readEngineRPM();
-//  delay(1000);
-#endif
 }
 
 

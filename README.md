@@ -6,13 +6,21 @@ This monitors an engine, mostly temperatures and fuel, emitting suitable N2K mes
 
 Single board. If using a 328p chip you will need to flash the bootloader. See programBootLoader for details. 
 
+## 328p based board 
+
 <div>
-<img alt="board" src="screenshots/Screenshot 2024-12-17 at 16.58.52.png" />
+<img alt="board" src="screenshots/328pBoard.png" />
 </div>
 
-Ran out of tinning solution so this board was manually tinned, hence the soldering looks a bit of a mess in places, but the copper is protected.
+## Attiny3226 Board, 12bit ADCs and better RPM accuracy
 
-## Changes from original
+<div>
+<img alt="board" src="screenshots/Attiny3226Board.png" />
+</div>
+
+
+
+## Changes from original build 4 years ago
 
 * All components SMD, no draughtboards or modules with pin headers to fail.
 * Switched from a LM385 to a LMV393 for the flywheel pulse generator as all I need is a clean square wave to count the pulses. (actually I miss ordered 10 LMV393's and then switched over).
@@ -22,15 +30,12 @@ Ran out of tinning solution so this board was manually tinned, hence the solderi
 
 # Memory usage
 
-after reducing memory requirements (580 used before)
+after reducing memory requirements (580 used before), varies up an down a bit with debug.
 
-    RAM:   [==        ]  23.8% (used 487 bytes from 2048 bytes)
-    Flash: [======    ]  63.1% (used 20366 bytes from 32256 bytes)
+attiny3226
 
-after 1 wire addition and better cli
-
-    RAM:   [===       ]  28.8% (used 589 bytes from 2048 bytes)
-    Flash: [========  ]  81.2% (used 26198 bytes from 32256 bytes)    
+    RAM:   [==        ]  19.6% (used 602 bytes from 3072 bytes)
+    Flash: [========  ]  76.3% (used 25009 bytes from 32768 bytes)
 
 NB, no malloc in use in code.
 
@@ -94,6 +99,11 @@ to monitor
 
 Do not attempt to power the board both on the 12v line and through the serial port 5v at the same time. This will probably shutdown the USB port on your laptop (or worse produce some smoke) Monitoring over serial can be done provided only GND, TX and RX are attached. Ie no power from the serial adapter.
 
+
+# LM393 RPM to pulses
+
+Critical that this chip as a 100nF decoupling capacitor. Without it it will generate pulses from power supply noise with the inputs shorted together. See schematic. LTSpice models don't predict this behavior.
+
 # Todo
 
 * [x] build board.
@@ -114,13 +124,16 @@ Do not attempt to power the board both on the 12v line and through the serial po
 * [x] Power from Engine supply since oil pressure sensors use > 10mA typically. This means fuel levels and temperature will only be available with engine controls turned on.
 * [x] Check voltage calibration, some doubt over digtal multi meter accuracy used previously - verified against a ADS1115 to be accurate
 * [x] Add firmware version, shows on the help, press h when connected over serial.
-* [ ] Create a attiny3226 based board, with 12bit ADCs for better resolution on the voltages.
+* [x] Create a attiny3226 based board, with 12bit ADCs for better resolution on the voltages.
+* [x] Calibrate CPU clock
+* [x] Verify RPM accuracy (measured at +- 0.2% relative to calibrated 16Mhz crystal)
+* [ ] Verify NTC and other ADC readings.
 * [ ] Install onboard
 
 # Could do... but probably will not
 
-uses about 50mA when running, but could probably reduce by powering most of the sensors by pulling an IO pin down which would mean NTCs, Fuel and perhaps other ADC dividers would only draw current when being read. However this might safe 5mA and when the engine is running, 8mA is irrelevant. The Fuel sensor is powered of 5v and draws 5mA which is the worst offender. Temperature sensors are 10K NTCs drawing 0.5mA each. Engine coolant sensor is powered by the engine so not relevant and the comparitor chip is idle when the engine is not running. Could power this down when there is no engine battery voltage indicating the engine controls are on. TBH, not sure its wroth optimising power as all the instruments draw about 2.5A currently (including chart plotter) so this represents +2% drain, which is less than adjusting the brightness on the OLED displays.
-
+The board currently runs of switched engine power, so to read fuel tank and batteries the engine has to be turned on. This is good, since power consumption becomes irrelevant although its typically < 80mA. I could optimize so that the board could be powered from the Can bus, but probably wont. Better to have it off when 
+not relevant.. eg when sailing.
 
 
 
