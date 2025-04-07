@@ -1,2 +1,5 @@
 .pio
+*.gbr
+*.drl
+*.gcode
 src/version.h

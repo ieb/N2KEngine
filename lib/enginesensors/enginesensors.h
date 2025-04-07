@@ -9,24 +9,10 @@
 
 // Engine hours resolution
 #define ENGINE_HOURS_PERIOD_MS 15000
+// dont emit any errors or warnings for measurements that require the engine to be running.
+// while it spins up.
+#define  ENGINE_START_GRACE_PERIOD 15000
 
-
-// ADC assignments
-#define ADC_ALTERNATOR_VOLTAGE 0
-#define ADC_FUEL_SENSOR 1
-#define ADC_EXHAUST_NTC1 2 // NTC1
-#define ADC_ALTERNATOR_NTC2 3 // NTC2
-#define ADC_ENGINEROOM_NTC3 4
-#define ADC_OIL_SENSOR 5
-#define ADC_COOLANT_TEMPERATURE 6
-#define ADC_ENGINEBATTERY 7
-
-
-
-// Digital pin assignments
-// Flywheel pulse pin
-#define PIN_FLYWHEEL 2
-#define PIN_ONE_WIRE 3 // not used at present
 
 // PGN 127489, status 1 and status 2 fields.
 
@@ -96,11 +82,21 @@ private:
 class EngineSensors {
     public:
 
-       EngineSensors(uint8_t flywheelPin=2, unsigned long flywheelReadPeriod=DEFAULT_FLYWHEEL_READ_PERIOD
-                        ):
-                     flywheelPin{flywheelPin},
-                     flywheelReadPeriod{flywheelReadPeriod}
-                     {
+       EngineSensors(uint8_t flywheelPin, 
+                    uint8_t adcAlternatorVoltage,
+                    uint8_t adcEngineBattery,
+                    uint8_t adcExhaustNTC1,
+                    uint8_t adcAlternatorNTC2,
+                    uint8_t adcEngineRoomNTC3,
+                    unsigned long flywheelReadPeriod=DEFAULT_FLYWHEEL_READ_PERIOD
+                    ){
+                        this->flywheelReadPeriod = flywheelReadPeriod;
+                        this->flywheelPin = flywheelPin;
+                        this->adcAlternatorVoltage = adcAlternatorVoltage;
+                        this->adcEngineBattery = adcEngineBattery;
+                        this->adcExhaustNTC1 = adcExhaustNTC1;
+                        this->adcAlternatorNTC2 = adcAlternatorNTC2;
+                        this->adcEngineRoomNTC3 = adcEngineRoomNTC3;
                      };
        bool begin();
        void read(bool outoutDebug=false);
@@ -143,12 +139,17 @@ class EngineSensors {
             );
 
       
-        uint8_t flywheelPin = 2;
+        uint8_t flywheelPin;
+        uint8_t adcAlternatorVoltage;
+        uint8_t adcEngineBattery;
+        uint8_t adcExhaustNTC1;
+        uint8_t adcAlternatorNTC2;
+        uint8_t adcEngineRoomNTC3;
         unsigned long flywheelReadPeriod = DEFAULT_FLYWHEEL_READ_PERIOD;
         LocalStorage localStorage;
         double engineRPM = 0;
         bool engineRunning = false;
-        uint16_t status1 = ENGINE_STATUS1_LOW_OIL_PRES | ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE | ENGINE_STATUS1_WATER_FLOW ;
+        uint16_t status1 = 0;
         uint16_t status2 = 0;
         bool fakeEngineRunning = false;
 
@@ -166,8 +167,10 @@ class EngineSensors {
 
 #endif
         bool eepromWritten = false;
+        bool canEmitAlarms = false;
         unsigned long lastFlywheelReadTime = 0;
         unsigned long lastEngineHoursTick = 0; 
+        unsigned long engineStarted = 0;
 };
 
 #endif

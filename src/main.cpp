@@ -77,7 +77,12 @@
 
 bool sensorDebug = false;
 
-EngineSensors sensors(PIN_FLYWHEEL);
+EngineSensors sensors(PIN_FLYWHEEL, 
+    ADC_ALTERNATOR_VOLTAGE,
+    ADC_ENGINEBATTERY,
+    ADC_EXHAUST_NTC1,
+    ADC_ALTERNATOR_NTC2,
+    ADC_ENGINEROOM_NTC3);
 
 
 const SNMEA2000ProductInfo productInfomation PROGMEM={

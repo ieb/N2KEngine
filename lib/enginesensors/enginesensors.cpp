@@ -283,8 +283,9 @@ void EngineSensors::saveEngineHours() {
   // when the engine is running, increment the engineHoursPeriod by 1 every 15s
   unsigned long now = millis();
   if ( engineRunning ) {
-    if ( engineRPM == 0 ) {
+    if ( engineRPM < 200 ) {
       engineRunning = false;
+      canEmitAlarms = false;
       SET_BIT(status2, ENGINE_STATUS2_ENGINE_SUTTING_DOWN);
     } else if ( now-lastEngineHoursTick > ENGINE_HOURS_PERIOD_MS ) {
       lastEngineHoursTick = now;
@@ -292,10 +293,14 @@ void EngineSensors::saveEngineHours() {
 
       localStorage.saveEngineHours();
       eepromWritten = true;
+    } else if ( now-engineStarted > ENGINE_START_GRACE_PERIOD ) {
+      canEmitAlarms = true;
     }
   } else {
     if ( engineRPM > 0 ) {
+      canEmitAlarms = false;
       engineRunning = true;
+      engineStarted = now;
       lastEngineHoursTick = now;
     } else {
       CLEAR_BIT(status1, ENGINE_STATUS1_EMERGENCY_STOP);
@@ -407,7 +412,7 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
     if ( oilPressureReading < 0 ) {
       oilPressureReading = 0;
     }
-    if (oilPressureReading < 68940.0) { // 10psi
+    if (oilPressureReading < 68940.0  && canEmitAlarms ) { // 10psi
       SET_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES | ENGINE_STATUS1_CHECK_ENGINE);
       SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED );
     } else {
@@ -525,13 +530,13 @@ double EngineSensors::getVoltage(uint8_t adc, bool outputDebug) {
     Serial.print(F(" V:"));Serial.println(voltage);    
   }
 
-  if ( adc == ADC_ALTERNATOR_VOLTAGE ) {
-    if ( voltage < 12.8) {
+  if ( adc == adcAlternatorVoltage ) {
+    if ( voltage < 12.8 && canEmitAlarms) {
       SET_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
     } else {
       CLEAR_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
     }
-  } else if ( adc == ADC_ENGINEBATTERY) {
+  } else if ( adc == adcEngineBattery) {
     if ( voltage < 11.8) {
       SET_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);
     } else {
@@ -577,21 +582,21 @@ double EngineSensors::getTemperatureK(uint8_t adc, bool outputDebug) {
     Serial.print(F(" K:"));Serial.println((0.1*temperature)+273.15);    
   }
 
-  if ( adc == ADC_EXHAUST_NTC1 ) {
+  if ( adc == adcExhaustNTC1 ) {
     if ( temperature > 80.0) {
       SET_BIT(status1, ENGINE_STATUS1_WATER_FLOW | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
       SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED);
     } else if ( temperature < 50.0) {
       CLEAR_BIT(status1, ENGINE_STATUS1_WATER_FLOW);
     }
-  } else if ( ADC_ALTERNATOR_NTC2) {
+  } else if ( adcAlternatorNTC2) {
     if ( temperature > 100.0) {
       SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
       SET_BIT(status1, ENGINE_STATUS2_WARN_2);
     } else if ( temperature < 50 ) {
       CLEAR_BIT(status1, ENGINE_STATUS2_WARN_2);
     }
-  } else if ( ADC_ENGINEROOM_NTC3 ) {
+  } else if ( adcEngineRoomNTC3 ) {
     if ( temperature > 70.0) {
       SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
       SET_BIT(status1, ENGINE_STATUS2_WARN_2);

@@ -9,7 +9,7 @@
     ;
   }
 #endif
-#define SERIAL_DEBUG (1)
+//#define SERIAL_DEBUG (1)
 
 #define TUNING_PIN PIN_PB1
 #define FORCE_PIN PIN_PA6
@@ -93,9 +93,7 @@ void ensureCleanReset() {
 }
 void setup() {
   ensureCleanReset();
-  #ifdef SERIAL_DEBUG
-    Serial.begin(115200);
-  #endif
+  Serial.begin(115200);
   #if (F_CPU==20000000L)
     stockCal = (*(uint8_t *)(0x1100 + 26));
   #elif  (F_CPU==16000000L)
@@ -134,7 +132,6 @@ void setup() {
     }
   #endif
   if (TuningDone == 1) {
-    #ifdef SERIAL_DEBUG
         Serial.println("already tuned");
         for (byte i = 0; i < 6; i++) {
           if (i) Serial.print(':');
@@ -142,12 +139,10 @@ void setup() {
         }
       Serial.println();
       Serial.flush();
-    #endif
     // If we're tuned we will pretend to be blink :-)
     TotallyJustBlink();
   }
   if (TuningDone == 255) {
-    #ifdef SERIAL_DEBUG
         Serial.println("tuning with new sketch");
         for (byte i = 0; i < 6; i++) {
           if (i) Serial.print(':');
@@ -155,7 +150,6 @@ void setup() {
         }
       Serial.println();
       Serial.flush();
-    #endif
   }
 }
 
@@ -193,10 +187,8 @@ void tidyTuningValues() {
 }
 
 void loop() {
-  #ifdef SERIAL_DEBUG
-    Serial.println("tuning");
-    Serial.flush();
-  #endif
+  Serial.println("tuning");
+  Serial.flush();
   _PROTECTED_WRITE(WDT_CTRLA, 0x0B);
   uint16_t lastpulselen = 1;
   uint8_t currentTarget = 0;
@@ -351,7 +343,6 @@ void loop() {
   _PROTECTED_WRITE(CLKCTRL_MCLKCTRLB, 2); // prescale disabled, div by 4
   _PROTECTED_WRITE(WDT_CTRLA, 0x00);
   _delay_ms(20);
-  #ifdef SERIAL_DEBUG
   Serial.println("Dump of USERSIG after tuning");
     for (byte i = 0; i < 6; i++) {
       if (i) Serial.print(':');
@@ -360,7 +351,6 @@ void loop() {
     Serial.flush();
   Serial.println("");
   Serial.println("Tuning should now be complete.");
-  #endif
   while(1);
   //_PROTECTED_WRITE(RSTCTRL_SWRR, RSTCTRL_SWRE_bm);
 }

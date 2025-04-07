@@ -227,6 +227,7 @@ void invalidPin() {
     OCR1B = TimerOC1B;
     pinMode(LED_BUILTIN,OUTPUT);
     Serial.println(OCR1A);
+    Serial.println("Output 500Hz running.");
   }
 #endif
 void loop() {
