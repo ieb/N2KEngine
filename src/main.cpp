@@ -76,6 +76,7 @@
 #define DEVICE_ADDRESS 24
 
 bool sensorDebug = false;
+bool monitorEnabled = false;
 
 EngineSensors sensors(PIN_FLYWHEEL, 
     ADC_ALTERNATOR_VOLTAGE,
@@ -277,12 +278,13 @@ void sendTemperatures() {
 }
 
 
-void printN2K(double v, double fact, double offset) {
+void printN2K(double v, double fact, double offset, const char * term="\n") {
   if ( v == SNMEA2000::n2kDoubleNA) {
-    Serial.println(F("--"));
+    Serial.print(F("--"));
   } else {
-    Serial.println((v*fact)-offset);
+    Serial.print((v*fact)-offset);
   }
+  Serial.print(term);
 }
 
 void showStatus() {
@@ -320,6 +322,35 @@ void showStatus() {
   Serial.print(F("ADC_COOLANT_TEMPERATURE: "));sensors.dumpADC(ADC_COOLANT_TEMPERATURE);
   Serial.print(F("ADC_ENGINEBATTERY: "));sensors.dumpADC(ADC_ENGINEBATTERY);
 
+}
+
+
+void monitor() {
+  static unsigned long lastMonitorOutput = 0;
+  if ( monitorEnabled) {
+    unsigned long now = millis();
+    if ( now-lastMonitorOutput > 1000 ) {
+      lastMonitorOutput = now;
+      Serial.print("rpm=");
+      printN2K(sensors.getEngineRPM(),1.0,0,",");
+      Serial.print(" coolant=");
+      printN2K(sensors.getCoolantTemperatureK(ADC_COOLANT_TEMPERATURE, ADC_ENGINEBATTERY, false),1.0, 273.15, ",");
+      Serial.print(" oil=");
+      printN2K(sensors.getOilPressure(ADC_OIL_SENSOR, false),1.0/6894.76,0.0, ",");
+      Serial.print(" fuel=");
+      printN2K(sensors.getFuelLevel(ADC_FUEL_SENSOR, false),1.0, 0.0, ",");
+      Serial.print(" batV=");
+      printN2K(sensors.getVoltage(ADC_ENGINEBATTERY, false), 1.0, 0.0, ",");
+      Serial.print(" altV=");
+      printN2K(sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE, false),1.0, 0.0, ",");
+      Serial.print(" exT=");
+      printN2K(sensors.getTemperatureK(ADC_EXHAUST_NTC1, false), 1.0, 273.15, ",");
+      Serial.print(" altT=");
+      printN2K(sensors.getTemperatureK(ADC_ALTERNATOR_NTC2, false),1.0, 273.15, ",");
+      Serial.print(" erT=");
+      printN2K(sensors.getTemperatureK(ADC_ENGINEROOM_NTC3, false),1.0, 273.15);
+    }
+  }
 }
 
 
@@ -377,6 +408,7 @@ void showHelp() {
   Serial.println(F("  - Send 's' to show status"));
   Serial.println(F("  - Send 'd' to toggle N2k diagnostics"));
   Serial.println(F("  - Send 'D' to toggle Sensor diagnostics"));
+  Serial.println(F("  - Send 'M' to toggle Engine Monitor output"));
   Serial.println(F("  - Send 'R' to restart"));
 }
 
@@ -400,6 +432,9 @@ void checkCommand() {
         break;
       case 'D':
         sensorDebug = !sensorDebug;
+        break;
+      case 'M':
+        monitorEnabled = !monitorEnabled;
         break;
       case 'V':
         setStoredVddVoltage();
@@ -442,6 +477,7 @@ void setup() {
 void loop() {
   sensors.read(sensorDebug);
   asyncBlink();
+  monitor();
   oneWireSensor.readOneWire();
   sendRapidEngineData();
   sendEngineData();

@@ -19,6 +19,22 @@ Single board. If using a 328p chip you will need to flash the bootloader. See pr
 </div>
 
 
+# Setup
+
+Setup starting with a new board, this is for 3226 which the preferred board.
+
+* Test the board supply to check power consumption, should be about 30mA at both 5v and 12v.
+* Connect up a UDPI programmer, and serial monitor.
+* Burn Fuses, and tune the internal clock on the 3226, see tuning3226/README.md
+* Upload the code.
+* Connect a CAN bus with 1 other device.
+* Verify CAN messages are sent and received (menu item d)
+* Measure and set the supply voltage to the chip after powering with 12v. (menu item V)
+* Check the Sensor diagnostics (menu item D, and M), might need to connect some NTC sensors and fake up flywheel source.
+* Set the engine hours to match the existing board.
+* Install the board
+
+
 
 ## Changes from original build 4 years ago
 

@@ -314,7 +314,6 @@ void EngineSensors::saveEngineHours() {
 
 
 
-
 double EngineSensors::getEngineRPM() {
   return engineRPM;
 }
