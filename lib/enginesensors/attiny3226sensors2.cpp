@@ -128,6 +128,9 @@ void EngineSensors::readEngineRPM(bool outputDebug) {
     Serial.print(ticks);      
   }
   engineRPM = round(frequency*2.0);
+  if (fakeEngineRunning) {
+    engineRPM = 1000;
+  }
 
   if ( outputDebug ) {
     Serial.print(F(" edgeInterrupts:"));

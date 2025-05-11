@@ -77,6 +77,9 @@ void EngineSensors::readEngineRPM() {
   // time is in ms
   double frequency = (double)pulses*1000000.0/(double)time;
   engineRPM = frequency * 2.0;
+  if (fakeEngineRunning) {
+    engineRPM = 1000;
+  }
   Serial.print(F("RPM Pulses :"));
   Serial.print(pulses);
   Serial.print(F(" Time :"));
@@ -169,6 +172,10 @@ void EngineSensors::readEngineRPM(bool outoutDebug) {
       engineRPM = 2.0*frequency;
     }
   }
+  if (fakeEngineRunning) {
+    engineRPM = 1000;
+  }
+
   if ( outoutDebug ) {
     Serial.print(F("RPM Period :"));
     Serial.print(period);

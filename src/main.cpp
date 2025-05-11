@@ -205,6 +205,12 @@ void sendEngineData() {
       double alternatorTemperature = sensors.getTemperatureK(ADC_ALTERNATOR_NTC2);
       uint16_t status1 = sensors.getEngineStatus1();
       uint16_t status2 = sensors.getEngineStatus2();
+      if (status1 != 0) {
+        sensors.dumpEngineStatus1();
+      }
+      if (status2 != 0) {
+        sensors.dumpEngineStatus2();
+      }
       engineMonitor.sendEngineDynamicParamMessage(ENGINE_INSTANCE,
           engineSeconds,
           coolantTemperature,
@@ -322,6 +328,10 @@ void showStatus() {
   Serial.print(F("ADC_COOLANT_TEMPERATURE: "));sensors.dumpADC(ADC_COOLANT_TEMPERATURE);
   Serial.print(F("ADC_ENGINEBATTERY: "));sensors.dumpADC(ADC_ENGINEBATTERY);
 
+  sensors.dumpEngineStatus1();
+  sensors.dumpEngineStatus2();
+
+
 }
 
 
@@ -411,6 +421,8 @@ void showHelp() {
   Serial.println(F("  - Send 'M' to toggle Engine Monitor output"));
   Serial.println(F("  - Send 'R' to restart"));
 }
+
+
 
 
 void checkCommand() {

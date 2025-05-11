@@ -45,7 +45,7 @@
 
 #define SET_BIT(x,y) x=(x) | (y)
 #define CLEAR_BIT(x,y) x=(x) & (~(y))
-
+#define TOGGLE_BIT(x,y) x=(x) ^ (y) 
 
 
 
@@ -119,11 +119,14 @@ class EngineSensors {
 
        void setStoredVddVoltage(double measuredVddVoltage);
        double getStoredVddVoltage();
-        void readEngineRPM(bool outoutDebug=false);
+       void readEngineRPM(bool outoutDebug=false);
 
 
        uint16_t getEngineStatus1();
        uint16_t getEngineStatus2();
+
+       void dumpEngineStatus1();
+       void dumpEngineStatus2();
 
     private:
         void loadEngineHours();

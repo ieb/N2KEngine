@@ -90,6 +90,9 @@ void EngineSensors::readEngineRPM(bool outputDebug) {
     + (float)smoothedRPM[2]
     + (float)smoothedRPM[3];
   engineRPM = frpm/40.0;
+  if (fakeEngineRunning) {
+    engineRPM = 1000;
+  }
 
   if ( outputDebug ) {
     Serial.print(F("RPM pulses :"));
