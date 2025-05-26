@@ -242,12 +242,10 @@ void EngineSensors::read(bool outputDebug) {
   if ( now-lastFlywheelReadTime > flywheelReadPeriod) {
     lastFlywheelReadTime = now;
     readEngineRPM(outputDebug);
+    updateEngineStatus();
   }
   saveEngineHours();
 }
-
-
-
 
 void EngineSensors::setStoredVddVoltage(double measuredVddVoltage) {
   localStorage.setVdd(measuredVddVoltage);
@@ -278,22 +276,14 @@ void EngineSensors::toggleFakeEngineRunning() {
   fakeEngineRunning = !fakeEngineRunning;
 }
 
-void EngineSensors::saveEngineHours() {
-  // Only count engine hours while the engine is running.
-  // when the engine is running, increment the engineHoursPeriod by 1 every 15s
+void EngineSensors::updateEngineStatus() {
   unsigned long now = millis();
   if ( engineRunning ) {
-    if ( engineRPM < 200 ) {
+    if ( engineRPM < ENGINE_SHUTDOWN_RPM ) {
       engineRunning = false;
       canEmitAlarms = false;
       Serial.print(F("EngineStop"));
       SET_BIT(status2, ENGINE_STATUS2_ENGINE_SUTTING_DOWN);
-    } else if ( now-lastEngineHoursTick > ENGINE_HOURS_PERIOD_MS ) {
-      lastEngineHoursTick = now;
-      localStorage.engineHoursPeriods++;
-
-      localStorage.saveEngineHours();
-      eepromWritten = true;
     } else if ( !canEmitAlarms && now-engineStarted > ENGINE_START_GRACE_PERIOD ) {
       dumpEngineStatus1();
       dumpEngineStatus2();
@@ -312,6 +302,21 @@ void EngineSensors::saveEngineHours() {
     } else {
       CLEAR_BIT(status1, ENGINE_STATUS1_EMERGENCY_STOP);
       CLEAR_BIT(status2, ENGINE_STATUS2_ENGINE_SUTTING_DOWN);
+    }
+  }
+}
+
+void EngineSensors::saveEngineHours() {
+  // Only count engine hours while the engine is running.
+  // when the engine is running, increment the engineHoursPeriod by 1 every 15s
+  if ( engineRunning ) {
+    unsigned long now = millis();
+    if ( now-lastEngineHoursTick > ENGINE_HOURS_PERIOD_MS ) {
+      lastEngineHoursTick = now;
+      localStorage.engineHoursPeriods++;
+
+      localStorage.saveEngineHours();
+      eepromWritten = true;
     }
   }
 }
@@ -451,7 +456,7 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
     if ( oilPressureReading < PSIV_POWEROFF ) {
       // disconnected or not powered up
       CLEAR_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES);
-      if ( engineRPM > 700 ) {
+      if ( engineRPM > MIN_ENGINE_RUNNING_RPM ) {
         SET_BIT(status2, ENGINE_STATUS2_ENGINE_COMM_ERROR);
       } else {
         CLEAR_BIT(status2, ENGINE_STATUS2_ENGINE_COMM_ERROR);
@@ -464,7 +469,7 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
     if ( oilPressureReading < 0 ) {
       oilPressureReading = 0;
     }
-    if (oilPressureReading < 68940.0 && engineRPM > 700 ) { // 10psi
+    if (oilPressureReading < MIN_OIL_PRESSURE && engineRPM > MIN_ENGINE_RUNNING_RPM ) { // 10psi
       SET_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES | ENGINE_STATUS1_CHECK_ENGINE);
       SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED );
     } else {
@@ -528,7 +533,7 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
     }
 
     // 98C, may want to make this a setting ?
-    if ( coolantTemperature > 980) {
+    if ( coolantTemperature > MAX_COOLANT_TEMP) {
       SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE);
       SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED);
     } else {
@@ -581,15 +586,14 @@ double EngineSensors::getVoltage(uint8_t adc, bool outputDebug) {
     Serial.print(F(" adc:"));Serial.print(adcReading);
     Serial.print(F(" V:"));Serial.println(voltage);    
   }
-
   if ( adc == adcAlternatorVoltage ) {
-    if ( voltage < 12.8 && engineRPM > 700 ) {
+    if ( voltage < LOW_ALTERNATOR_VOLTAGE && engineRPM > MIN_ENGINE_RUNNING_RPM ) {
       SET_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
     } else {
       CLEAR_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
     }
   } else if ( adc == adcEngineBattery) {
-    if ( voltage < 11.8 && engineRPM > 700) {
+    if ( voltage < LOW_BATTERY_VOLTAGE && engineRPM > MIN_ENGINE_RUNNING_RPM) {
       SET_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);
     } else {
       CLEAR_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);
@@ -637,26 +641,26 @@ double EngineSensors::getTemperatureK(uint8_t adc, bool outputDebug) {
   // temperatures are in 0.1C
   // 80C
   if ( adc == adcExhaustNTC1 ) {
-    if ( temperature > 800) {
+    if ( temperature > MAX_EXHAUST_TEMP) {
       SET_BIT(status1, ENGINE_STATUS1_WATER_FLOW | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
       SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED);
-    } else if ( temperature < 500) {
+    } else if ( temperature < CLEAR_EXHAUST_TEMP) {
       CLEAR_BIT(status1, ENGINE_STATUS1_WATER_FLOW);
     }
   } else if ( adcAlternatorNTC2) {
     // 100C
-    if ( temperature > 1000) {
+    if ( temperature > MAX_ALTERNATOR_TEMP) {
       SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
       SET_BIT(status1, ENGINE_STATUS2_WARN_2);
-    } else if ( temperature < 500 ) {
+    } else if ( temperature < CLEAR_ALTERLATOR_TEMP ) {
       CLEAR_BIT(status1, ENGINE_STATUS2_WARN_2);
     }
   } else if ( adcEngineRoomNTC3 ) {
     // 70C
-    if ( temperature > 700) {
+    if ( temperature > MAX_ENGINE_ROOM_TEMP) {
       SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
       SET_BIT(status1, ENGINE_STATUS2_WARN_2);
-    } else if ( temperature < 400 ) {
+    } else if ( temperature < CLEAR_ENGINE_ROOM_TEMP ) {
       CLEAR_BIT(status1, ENGINE_STATUS2_WARN_2);
     }
   }

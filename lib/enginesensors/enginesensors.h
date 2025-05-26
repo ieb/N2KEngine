@@ -14,6 +14,30 @@
 #define  ENGINE_START_GRACE_PERIOD 15000
 
 
+// Alarm temperatures in 0.1C
+// These alarms are not dependent on engine speed.
+#define MAX_EXHAUST_TEMP 800
+#define CLEAR_EXHAUST_TEMP 500
+#define MAX_ALTERNATOR_TEMP 1000
+#define CLEAR_ALTERLATOR_TEMP 500
+#define MAX_ENGINE_ROOM_TEMP 700
+#define CLEAR_ENGINE_ROOM_TEMP 400
+#define MAX_COOLANT_TEMP 970
+
+// speed below which the engine is not running 
+// below this alarms that depend on engine speed are not active
+#define MIN_ENGINE_RUNNING_RPM 700
+// below this the engine is shutting down
+#define ENGINE_SHUTDOWN_RPM 200
+
+
+// alarm levels dependent on engine speed.
+#define LOW_ALTERNATOR_VOLTAGE 12.8
+#define LOW_BATTERY_VOLTAGE 11.8
+#define MIN_OIL_PRESSURE 68940.0  // 10psi
+
+
+
 // PGN 127489, status 1 and status 2 fields.
 
 #define ENGINE_STATUS1_CHECK_ENGINE        0x0001
@@ -131,6 +155,7 @@ class EngineSensors {
     private:
         void loadEngineHours();
         void writeEnginHours();
+        void updateEngineStatus();
 
         int16_t interpolate(
             int16_t reading, 
