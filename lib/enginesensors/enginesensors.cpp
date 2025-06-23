@@ -365,8 +365,7 @@ double EngineSensors::getFuelLevel(uint8_t adc, bool outputDebug) {
       Serial.print(F(" %:"));Serial.print(fuelReading);
       Serial.println("");
     }    
-
-
+ 
 
     // the restances may be out of spec so deal with > 100 or < 0.
     if ( fuelReading > 200 ) {
@@ -470,6 +469,9 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
       oilPressureReading = 0;
     }
     if (oilPressureReading < MIN_OIL_PRESSURE && engineRPM > MIN_ENGINE_RUNNING_RPM ) { // 10psi
+      if ( (status1 & ENGINE_STATUS1_LOW_OIL_PRES) == 0) {
+        localStorage.saveEvent(EVENT_LOW_OIL_PRES);
+      }
       SET_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES | ENGINE_STATUS1_CHECK_ENGINE);
       SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED );
     } else {
@@ -534,6 +536,10 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
 
     // 98C, may want to make this a setting ?
     if ( coolantTemperature > MAX_COOLANT_TEMP) {
+      if ( (status1 & ENGINE_STATUS1_LOW_OIL_PRES) == 0) {
+        localStorage.saveEvent(EVENT_HIGH_COOLANT);
+      }
+
       SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE);
       SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED);
     } else {
@@ -642,6 +648,9 @@ double EngineSensors::getTemperatureK(uint8_t adc, bool outputDebug) {
   // 80C
   if ( adc == adcExhaustNTC1 ) {
     if ( temperature > MAX_EXHAUST_TEMP) {
+      if ( (status1 & ENGINE_STATUS1_WATER_FLOW) == 0) {
+        localStorage.saveEvent(EVENT_EXHAUST_TEMP);
+      }
       SET_BIT(status1, ENGINE_STATUS1_WATER_FLOW | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
       SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED);
     } else if ( temperature < CLEAR_EXHAUST_TEMP) {
@@ -650,6 +659,9 @@ double EngineSensors::getTemperatureK(uint8_t adc, bool outputDebug) {
   } else if ( adcAlternatorNTC2) {
     // 100C
     if ( temperature > MAX_ALTERNATOR_TEMP) {
+      if ( (status1 & ENGINE_STATUS1_OVERTEMP) == 0) {
+        localStorage.saveEvent(EVENT_ALTERNATOR_TEMP);
+      }
       SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
       SET_BIT(status1, ENGINE_STATUS2_WARN_2);
     } else if ( temperature < CLEAR_ALTERLATOR_TEMP ) {
@@ -658,6 +670,9 @@ double EngineSensors::getTemperatureK(uint8_t adc, bool outputDebug) {
   } else if ( adcEngineRoomNTC3 ) {
     // 70C
     if ( temperature > MAX_ENGINE_ROOM_TEMP) {
+      if ( (status1 & ENGINE_STATUS1_OVERTEMP) == 0) {
+        localStorage.saveEvent(EVENT_ENGINE_ROOM_TEMP);
+      }
       SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE | ENGINE_STATUS1_EMERGENCY_STOP);
       SET_BIT(status1, ENGINE_STATUS2_WARN_2);
     } else if ( temperature < CLEAR_ENGINE_ROOM_TEMP ) {

@@ -88,6 +88,15 @@
 #define RPM_FACTOR 2.0 
 
 
+
+#define EVENTS_NO_EVENT 0
+#define EVENT_ENGINE_STOP 1
+#define EVENT_LOW_OIL_PRES 2
+#define EVENT_HIGH_COOLANT 3
+#define EVENT_EXHAUST_TEMP 4
+#define EVENT_ALTERNATOR_TEMP 5
+#define EVENT_ENGINE_ROOM_TEMP 6
+
 class LocalStorage {
 public:
     LocalStorage() {};
@@ -96,24 +105,30 @@ public:
     void loadEngineHours();
     void saveEngineHours();
 
+    void clearEvents();
+    void saveEvent(uint8_t eventId);
+    uint8_t nextEvent(uint32_t *lastEvent);
+    uint8_t countEvents();
+
     uint32_t engineHoursPeriods = 0;
     double vdd = 5.0;
 private:
-    void updateCRC();
-    bool eepromValid();
+    void updateBlockCRC(uint8_t crc_offset, uint8_t block_len);
+    bool eepromBlockValid(uint8_t crc_offset, uint8_t block_len);
 };
 
 class EngineSensors {
     public:
 
-       EngineSensors(uint8_t flywheelPin, 
+       EngineSensors(
+                    uint8_t flywheelPin, 
                     uint8_t adcAlternatorVoltage,
                     uint8_t adcEngineBattery,
                     uint8_t adcExhaustNTC1,
                     uint8_t adcAlternatorNTC2,
                     uint8_t adcEngineRoomNTC3,
                     unsigned long flywheelReadPeriod=DEFAULT_FLYWHEEL_READ_PERIOD
-                    ){
+                    ) {
                         this->flywheelReadPeriod = flywheelReadPeriod;
                         this->flywheelPin = flywheelPin;
                         this->adcAlternatorVoltage = adcAlternatorVoltage;
@@ -152,6 +167,8 @@ class EngineSensors {
        void dumpEngineStatus1();
        void dumpEngineStatus2();
 
+        LocalStorage localStorage;
+
     private:
         void loadEngineHours();
         void writeEnginHours();
@@ -174,7 +191,6 @@ class EngineSensors {
         uint8_t adcAlternatorNTC2;
         uint8_t adcEngineRoomNTC3;
         unsigned long flywheelReadPeriod = DEFAULT_FLYWHEEL_READ_PERIOD;
-        LocalStorage localStorage;
         double engineRPM = 0;
         bool engineRunning = false;
         uint16_t status1 = 0;

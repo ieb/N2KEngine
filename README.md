@@ -50,10 +50,10 @@ after reducing memory requirements (580 used before), varies up an down a bit wi
 
 attiny3226
 
-    RAM:   [==        ]  19.6% (used 602 bytes from 3072 bytes)
-    Flash: [========  ]  76.3% (used 25009 bytes from 32768 bytes)
-
+    RAM:   [==        ]  20.1% (used 619 bytes from 3072 bytes)
+    Flash: [========  ]  81.1% (used 26579 bytes from 32768 bytes)
 NB, no malloc in use in code.
+Over 77% Flash usag pio inspect no longer works, however removing One wire code may give enough space for debug symbols to allow inspect to work
 
 # Status bits.
 
@@ -120,6 +120,58 @@ Do not attempt to power the board both on the 12v line and through the serial po
 
 Critical that this chip as a 100nF decoupling capacitor. Without it it will generate pulses from power supply noise with the inputs shorted together. See schematic. LTSpice models don't predict this behavior.
 
+
+# Engine Events
+
+Stores upto 29 events in EEPROM, with a 15s resolution and one of upto 255 types.
+All the following PGNS have standard priorietary PGN format + a Function code byte.
+The Manufactore code is 2046 and the Industry is Marine, ie 4.
+
+## PGN 65305L
+
+Stadard  Packet proprietary, 8 bytes
+
+| Field | Length | Value     | Description            |
+|-----------------------------------------------------|
+| 1     | 11 bits| 2046      | Manufacturer code      |
+| 2     | 2 bits |           | Rserved                |
+| 3     | 3 bits | 4 (0b100) | Industry Code          |
+| 4     | 8 bits |           | Requst Function Number |
+| 5     | 5 bytes|           | reserved/payload       |
+
+
+
+|  Function | Description         | Valid PGN | Response                              |
+|-----------|---------------------|-----------|---------------------------------------|
+| 11        | Get events          | 65305L    | Events PGN 130817L Functon 12         |
+| 12        | Get events response | 130817L   | List of events                        |
+| 13        | Clear events        | 65305L    | ACK PGN 65305L Functon 14, no payload |
+| 14        | Clear events ACK    | 65305L    | Ack clear events, no payload          |
+
+
+## PGN 130817L
+
+
+| Field | Length | Value     | Description            |
+|-------|--------|-----------|------------------------|
+| 1     | 11 bits| 2046      | Manufacturer code      |
+| 2     | 2 bits |           | Rserved                |
+| 3     | 3 bits | 4 (0b100) | Industry Code          |
+| 4     | 8 bits |           | Requst Function Number |
+
+
+## Function 12
+
+
+| Field   | Length  | Value         | Description                            | 
+|---------|---------|---------------|----------------------------------------|
+| 4       | 1 byte  | uint8_t       | Number of events                       |
+| 5+(n*4) | 1 byte  | uint8_t       | Event ID                               |
+| 6+(n*4) | 3 bytes | 3Byte UDouble | Engine Hours of event (15s resolution) |
+
+
+
+
 # Todo
 
 * [x] build board.
@@ -143,8 +195,10 @@ Critical that this chip as a 100nF decoupling capacitor. Without it it will gene
 * [x] Create a attiny3226 based board, with 12bit ADCs for better resolution on the voltages.
 * [x] Calibrate CPU clock
 * [x] Verify RPM accuracy (measured at +- 0.2% relative to calibrated 16Mhz crystal)
-* [ ] Verify NTC and other ADC readings.
-* [ ] Install onboard
+* [x] Verify NTC and other ADC readings.
+* [x] Install onboard
+* [x] Implement event storage
+* [x] Implement PGN proprietary messages to query engine events.
 
 # Could do... but probably will not
 

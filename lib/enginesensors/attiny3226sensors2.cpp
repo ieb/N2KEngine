@@ -81,7 +81,9 @@ void setupTimerFrequencyMeasurement(uint8_t flywheelPin) {
   TCA0.SINGLE.INTCTRL = TCA_SINGLE_OVF_bm; //enable overflow interrupt
   TCA0.SINGLE.CTRLA |= TCA_SINGLE_ENABLE_bm; //enable the timer keeping the prescaler.
 
+#ifdef WITH_DEBUG
   Serial.println("Frequency measurement 2: Timer A0 setup done");
+#endif
 
 }
 
@@ -113,6 +115,7 @@ void EngineSensors::readEngineRPM(bool outputDebug) {
   // and ignore where not enough pulses have been seen (nEdgeInterupts > 150)
   if ( nEdgeInterrupts > 150 && overflows < 2 && ticks > 3000) {
     frequency = 50.0*250000.0/(double) ticks;
+#ifdef WITH_DEBUG
     if ( outputDebug ) {
       Serial.print(F("valid   "));
     }
@@ -126,12 +129,14 @@ void EngineSensors::readEngineRPM(bool outputDebug) {
     Serial.print(edgesL);
     Serial.print(F(" ticks:"));
     Serial.print(ticks);      
+#endif
   }
   engineRPM = round(frequency*2.0);
   if (fakeEngineRunning) {
     engineRPM = 1000;
   }
 
+#ifdef WITH_DEBUG
   if ( outputDebug ) {
     Serial.print(F(" edgeInterrupts:"));
     Serial.print(nEdgeInterrupts);
@@ -144,6 +149,7 @@ void EngineSensors::readEngineRPM(bool outputDebug) {
     Serial.print(F(" RPM:"));
     Serial.println(round(frequency*2.0));
   }
+#endif
 
 }
 

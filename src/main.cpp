@@ -4,8 +4,9 @@
 #include "enginesensors.h"
 #include "SmallNMEA2000.h"
 #include <MemoryFree.h>
+#ifndef INSPECT_FLASH_USAGE
 #include "oneWireSensors.h"
-
+#endif
 
 #define RAPID_ENGINE_UPDATE_PERIOD 500
 #define ENGINE_UPDATE_PERIOD 1000
@@ -131,10 +132,10 @@ EngineMonitor engineMonitor = EngineMonitor(DEVICE_ADDRESS,
   &rxPGN[0],
   SNMEA_SPI_CS_PIN);
 
-
+#ifndef INSPECT_FLASH_USAGE
 OneWire oneWire(PIN_ONE_WIRE);
 OneWireSensors oneWireSensor(&oneWire);
-
+#endif
 
 #ifdef LED_PIN
 void toggleLed() {
@@ -275,10 +276,12 @@ void sendTemperatures() {
     // custom temperatures
     // temperature source can be 0-255, 0-15 are defined.
     engineMonitor.sendTemperatureMessage(sid, 0, 30, sensors.getTemperatureK(ADC_ALTERNATOR_NTC2));
+#ifndef INSPECT_FLASH_USAGE
     uint8_t maxActiveDevices = oneWireSensor.getMaxActiveDevice();
     for (int i = 0; i < maxActiveDevices; i++) {
       engineMonitor.sendTemperatureMessage(sid, 0, 31+i, oneWireSensor.getTemperatureK(i));
     }
+#endif
     sid++;
   }
 }
@@ -293,6 +296,8 @@ void printN2K(double v, double fact, double offset, const char * term="\n") {
   Serial.print(term);
 }
 
+
+// uses 1.1KB
 void showStatus() {
   Serial.print(F("CPU Vdd   : "));Serial.println(sensors.getStoredVddVoltage());
   Serial.print(F("Free mem  : "));Serial.println(freeMemory());
@@ -308,6 +313,7 @@ void showStatus() {
   sensors.read(sensorDebug);
   Serial.print(F("Engine On : "));Serial.println(sensors.isEngineRunning()?"Y":"N");
   Serial.print(F("Engine RPM: "));printN2K(sensors.getEngineRPM(),1.0,0);
+#ifndef INSPECT_FLASH_USAGE
   uint8_t maxActiveDevices = oneWireSensor.getMaxActiveDevice();
   Serial.print(F("Onewire N : "));Serial.println(maxActiveDevices);
   for (int i = 0; i < maxActiveDevices; i++) {
@@ -316,24 +322,38 @@ void showStatus() {
     Serial.print(F(" : "));
     printN2K(oneWireSensor.getTemperatureK(i),1.0,273.15);
   }
+#endif
   engineMonitor.dumpStatus();
 
 
-  Serial.print(F("ADC_EXHAUST_NTC1"));sensors.dumpADC(ADC_EXHAUST_NTC1);
-  Serial.print(F("ADC_ALTERNATOR_NTC2: "));sensors.dumpADC(ADC_ALTERNATOR_NTC2);
-  Serial.print(F("ADC_ENGINEROOM_NTC3: "));sensors.dumpADC(ADC_ENGINEROOM_NTC3);
-  Serial.print(F("ADC_ALTERNATOR_VOLTAGE: "));sensors.dumpADC(ADC_ALTERNATOR_VOLTAGE);
-  Serial.print(F("ADC_FUEL_SENSOR: "));sensors.dumpADC(ADC_FUEL_SENSOR);
-  Serial.print(F("ADC_OIL_SENSOR: "));sensors.dumpADC(ADC_OIL_SENSOR);
-  Serial.print(F("ADC_COOLANT_TEMPERATURE: "));sensors.dumpADC(ADC_COOLANT_TEMPERATURE);
-  Serial.print(F("ADC_ENGINEBATTERY: "));sensors.dumpADC(ADC_ENGINEBATTERY);
+  Serial.print(F("ADC_EXH  : "));sensors.dumpADC(ADC_EXHAUST_NTC1);
+  Serial.print(F("ADC_ALT  : "));sensors.dumpADC(ADC_ALTERNATOR_NTC2);
+  Serial.print(F("ADC_ROOM : "));sensors.dumpADC(ADC_ENGINEROOM_NTC3);
+  Serial.print(F("ADC_ALT_V: "));sensors.dumpADC(ADC_ALTERNATOR_VOLTAGE);
+  Serial.print(F("ADC_FUEL : "));sensors.dumpADC(ADC_FUEL_SENSOR);
+  Serial.print(F("ADC_OIL  : "));sensors.dumpADC(ADC_OIL_SENSOR);
+  Serial.print(F("ADC_COOL : "));sensors.dumpADC(ADC_COOLANT_TEMPERATURE);
+  Serial.print(F("ADC_BAT  : "));sensors.dumpADC(ADC_ENGINEBATTERY);
 
   sensors.dumpEngineStatus1();
   sensors.dumpEngineStatus2();
 
+  // dump the stored events
+  uint32_t lastEvent = 0;
+  Serial.println(F("Stored Events"));
+  for (int i = 0; i < 30; ++i) {
+    uint8_t eventId = sensors.localStorage.nextEvent(lastEvent);
+    if ( eventId == EVENTS_NO_EVENT) {
+      break;
+    }
+    Serial.print(F("evt:"));
+    Serial.print(eventId);
+    Serial.print(F(" h:"));
+    Serial.println(0.004166666667*lastEvent);
+  }
+
 
 }
-
 
 void monitor() {
   static unsigned long lastMonitorOutput = 0;
@@ -368,13 +388,13 @@ void(* resetDevice) (void) = 0; //declare reset function @ address 0
 
 void setEngineHours() {
   Serial.setTimeout(10000);
-  Serial.print(F("New Engine Hours ?>"));
+  Serial.print(F("Engine Hours ?>"));
   char buffer[10];
   size_t l = Serial.readBytesUntil('\n', buffer, 9);
   if ( l > 0) {
     buffer[l] = '\0';
     double hours = atof(buffer);
-    Serial.print(F("Setting hours to "));
+    Serial.print(F("Engine Hours:"));
     Serial.println(hours);
     sensors.setEngineSeconds(hours*3600.0);
   } else {
@@ -386,13 +406,13 @@ void setEngineHours() {
 
 void setStoredVddVoltage() {
   Serial.setTimeout(10000);
-  Serial.print(F("Calibrated Vdd Voltage ?>"));
+  Serial.print(F("Vdd Voltage ?>"));
   char buffer[10];
   size_t l = Serial.readBytesUntil('\n', buffer, 9);
   if ( l > 0) {
     buffer[l] = '\0';
     double measuredVoltagee = atof(buffer);
-    Serial.print(F("Calibrated Vdd Voltage to :"));
+    Serial.print(F("Vdd Voltage:"));
     Serial.println(measuredVoltagee,5);
     sensors.setStoredVddVoltage(measuredVoltagee);
   } else {
@@ -411,15 +431,16 @@ void toggleDiagnostics() {
 void showHelp() {
   Serial.println(F("N2K Engine monitor."));
   Serial.print(F("Git Version: "));Serial.println(F(GIT_SHA1_VERSION));
-  Serial.println(F("  - Send 'h' to show this message"));
-  Serial.println(F("  - Send 'E' to set engine hours"));
-  Serial.println(F("  - Send 'V' to set Vdd Supply voltage"));
+  Serial.println(F("  - Send 'h' help"));
+  Serial.println(F("  - Send 'E' set hours"));
+  Serial.println(F("  - Send 'V' set Vdd "));
   Serial.println(F("  - Send 'F' fake Engine RPM at 1K"));
-  Serial.println(F("  - Send 's' to show status"));
-  Serial.println(F("  - Send 'd' to toggle N2k diagnostics"));
-  Serial.println(F("  - Send 'D' to toggle Sensor diagnostics"));
-  Serial.println(F("  - Send 'M' to toggle Engine Monitor output"));
-  Serial.println(F("  - Send 'R' to restart"));
+  Serial.println(F("  - Send 's' status"));
+  Serial.println(F("  - Send 'C' clear events"));
+  Serial.println(F("  - Send 'd' toggle N2k debug"));
+  Serial.println(F("  - Send 'D' toggle Sensor debug"));
+  Serial.println(F("  - Send 'M' toggle Engine debug"));
+  Serial.println(F("  - Send 'R' restart"));
 }
 
 
@@ -448,6 +469,9 @@ void checkCommand() {
       case 'M':
         monitorEnabled = !monitorEnabled;
         break;
+      case 'C':
+        sensors.localStorage.clearEvents();
+        break;
       case 'V':
         setStoredVddVoltage();
         break;
@@ -461,26 +485,74 @@ void checkCommand() {
 }
 
 
+#define FN_DUMP_EVENTS 11
+#define FN_DUMP_EVENTS_RESP 12
+#define FN_CLEAR_EVENTS 13
+#define FN_CLEAR_EVENTS_RESP 14
+
+
+void messageHandler(MessageHeader *requestMessageHeader, byte * buffer, int len) {
+  if ( requestMessageHeader->pgn == 65305L) { // single packet pro[prietary]
+
+    uint16_t id = (((unsigned long )buffer[2])<<16)|(((unsigned long )buffer[1])<<8)|(buffer[0]);
+    if ( id == (2046 & 0x8000) ) { // matches us 2046 + marine industry
+      uint8_t function = buffer[3];
+      if ( function == FN_DUMP_EVENTS) { // a function we recognise, dump the stored events
+        // requested error history
+        uint8_t nevents = sensors.localStorage.countEvents();
+        MessageHeader messageHeader(130817L, 6, engineMonitor.getAddress(), requestMessageHeader->source);
+        engineMonitor.startFastPacket(&messageHeader, 2+2+nevents*4);
+        engineMonitor.output2ByteUInt(id);
+        engineMonitor.outputByte(FN_DUMP_EVENTS_RESP);
+        engineMonitor.outputByte(nevents);
+        uint32_t lastEvent = 0;
+        for(int i = 0; i < nevents; i++) {
+          uint8_t eventId = sensors.localStorage.nextEvent(&lastEvent);
+          engineMonitor.outputByte(eventId);
+          engineMonitor.output3ByteUDouble(0.004166666667*(double)(lastEvent&0xFFFFFF), 1.0);
+        }
+        engineMonitor.finishFastPacket();
+      } else if ( function == FN_CLEAR_EVENTS) { // clear stored events
+        sensors.localStorage.clearEvents();
+        MessageHeader messageHeader(65305L, 6, engineMonitor.getAddress(), requestMessageHeader->source);
+        engineMonitor.startPacket(&messageHeader);
+        engineMonitor.output2ByteUInt(id);
+        engineMonitor.outputByte(FN_CLEAR_EVENTS_RESP);
+        engineMonitor.finishPacket();
+      } 
+      // TODO, consider replacing serial functions with CAN proprietary messages 
+      // which are easier to send without direct access to the serial port.
+      // setEngineHours - no real point in exposing this over can
+      // setStoredVddVoltage -- the reading for this is only available with the box open and should never change. 
+
+    }
+  }
+}
+
+
 void setup() {
   Serial.begin(19200);
   Serial.println(F("Luna engine monitor start"));
   setupLed();
+  engineMonitor.setMessageHandler(messageHandler);
   Serial.println(F("Opening CAN"));
   while (!engineMonitor.open(MCP_16MHz) ) {
-    Serial.println(F("Failed to start NMEA2000, retry in 5s or check wiring pins"));
+    Serial.println(F("CAN Failed"));
     delay(5000);
     blinkLed(2);
   }
   Serial.println(F("Opened, MCP2515 Operational"));
 
   while(!sensors.begin() ) {
-    Serial.println(F("Failed to start Engine Sensors, retry in 5s"));
+    Serial.println(F("Engine Sensors failed"));
     delay(5000);
     blinkLed(3);
   }
 
+#ifndef INSPECT_FLASH_USAGE
   Serial.println(F("Starting one wire"));
   oneWireSensor.begin();
+#endif
   blinkLed(4);
 
   Serial.println(F("Running..."));;
@@ -490,7 +562,9 @@ void loop() {
   sensors.read(sensorDebug);
   asyncBlink();
   monitor();
+#ifndef INSPECT_FLASH_USAGE  
   oneWireSensor.readOneWire();
+#endif
   sendRapidEngineData();
   sendEngineData();
   sendVoltages();

@@ -19,7 +19,7 @@ class OneWireSensors {
       float temperature[MAX_ONE_WIRE_SENSORS];
       DeviceAddress tempDevices[MAX_ONE_WIRE_SENSORS];
       DallasTemperature tempSensors;
-      uint8_t maxActiveDevice;
-      unsigned long lastReadTime;
+      uint8_t maxActiveDevice = 0;
+      unsigned long lastReadTime = 0;
       bool requestTemperaturesRequired = false;
 };
