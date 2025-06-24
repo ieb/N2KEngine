@@ -124,9 +124,9 @@ void LocalStorage::saveEngineHours() {
  */ 
 void LocalStorage::clearEvents() {
   for (int i = EVENTS_START; i < EVENTS_LEN; ++i) {
-      EEPROM.update(EEPROM_ENGINE_HOURS, 0x00);
+      EEPROM.update(i, 0x00);
   }
-  updateBlockCRC(EVENTS_CRC, EEPROM_LEN);
+  updateBlockCRC(EVENTS_CRC, EVENTS_LEN);
 }
 
 
@@ -157,7 +157,7 @@ void LocalStorage::saveEvent(uint8_t eventId) {
     EEPROM.update(useSlot+1, (engineHoursPeriods>>8)&0xff);
     EEPROM.update(useSlot+2, (engineHoursPeriods>>16)&0xff);
     EEPROM.update(useSlot+3, eventId);
-    updateBlockCRC(EVENTS_CRC, EEPROM_LEN);    
+    updateBlockCRC(EVENTS_CRC, EVENTS_LEN);    
   }
 }
 
@@ -171,8 +171,8 @@ uint8_t LocalStorage::nextEvent(uint32_t *lastEvent) {
   uint8_t eventId = EVENTS_NO_EVENT;
   uint32_t minEventTime = 0xffffff;
   for (int i = EVENTS_START; i < EVENTS_LEN; i=i+4) {
-    eventId = EEPROM.read(i+3);
-    if ( eventId != EVENTS_NO_EVENT ) {
+    uint8_t e = EEPROM.read(i+3);
+    if ( e != EVENTS_NO_EVENT ) {
       uint32_t eventTime = EEPROM.read(i+2);
       eventTime = eventTime<<8;
       eventTime = eventTime | EEPROM.read(i+1);
@@ -180,7 +180,8 @@ uint8_t LocalStorage::nextEvent(uint32_t *lastEvent) {
       eventTime = eventTime | EEPROM.read(i); 
       if ( eventTime > *lastEvent && eventTime < minEventTime) {
         minEventTime = eventTime;
-      }      
+        eventId = e;
+      }     
     }
   }
   *lastEvent = minEventTime;

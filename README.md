@@ -199,6 +199,7 @@ Stadard  Packet proprietary, 8 bytes
 * [x] Install onboard
 * [x] Implement event storage
 * [x] Implement PGN proprietary messages to query engine events.
+* [x] Update schematic to improve ADC stability when charging main LiFePO4s
 
 # Could do... but probably will not
 

@@ -340,9 +340,10 @@ void showStatus() {
 
   // dump the stored events
   uint32_t lastEvent = 0;
-  Serial.println(F("Stored Events"));
+  Serial.print(F("Stored Events:"));
+  Serial.println(sensors.localStorage.countEvents());
   for (int i = 0; i < 30; ++i) {
-    uint8_t eventId = sensors.localStorage.nextEvent(lastEvent);
+    uint8_t eventId = sensors.localStorage.nextEvent(&lastEvent);
     if ( eventId == EVENTS_NO_EVENT) {
       break;
     }
@@ -447,6 +448,8 @@ void showHelp() {
 
 
 void checkCommand() {
+  // Remove after testing
+  static uint8_t eventId = 1;
   if (Serial.available()) {
     char chr = Serial.read();
     switch ( chr ) {
@@ -456,6 +459,11 @@ void checkCommand() {
         break;
       case 'E':
         setEngineHours();
+        break;
+      case 'e':
+        // NOT in the menu, only here for testing
+        sensors.localStorage.engineHoursPeriods += 10;
+        sensors.localStorage.saveEvent(eventId++);
         break;
       case 'F':
         sensors.toggleFakeEngineRunning();
