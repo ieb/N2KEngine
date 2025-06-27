@@ -107,7 +107,7 @@ public:
 
     void clearEvents();
     void saveEvent(uint8_t eventId);
-    uint8_t nextEvent(uint32_t *lastEvent);
+    uint8_t nextEvent(uint32_t &lastEvent);
     uint8_t countEvents();
 
     uint32_t engineHoursPeriods = 0;

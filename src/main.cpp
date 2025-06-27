@@ -76,6 +76,15 @@
 
 #define DEVICE_ADDRESS 24
 
+#define ENGINE_PROPRIETARY_PGN  65305L
+#define ENGINE_PROPRIETARY_FP_PGN  130817L
+#define ENGINE_PROPRIETARY_CODE 0x9ffe // 2046 & 0x7FE | 0x3<<11 | 0x04<<13
+#define FN_DUMP_EVENTS 11
+#define FN_DUMP_EVENTS_RESP 12
+#define FN_CLEAR_EVENTS 13
+#define FN_CLEAR_EVENTS_RESP 14
+
+
 bool sensorDebug = false;
 bool monitorEnabled = false;
 
@@ -104,7 +113,7 @@ const SNMEA2000ConfigInfo configInfo PROGMEM={
 };
 
 
-const unsigned long txPGN[] PROGMEM = { 
+const unsigned long txPGN[] = { 
     127488L, // Rapid engine ideally 0.1s
     127489L, // Dynamic engine 0.5s
     127505L, // Tank Level 2.5s
@@ -112,7 +121,10 @@ const unsigned long txPGN[] PROGMEM = {
     127508L,
   SNMEA200_DEFAULT_TX_PGN
 };
-const unsigned long rxPGN[] PROGMEM = { 
+
+const unsigned long rxPGN[] = { 
+  ENGINE_PROPRIETARY_PGN,
+  ENGINE_PROPRIETARY_FP_PGN,
   SNMEA200_DEFAULT_RX_PGN
 };
 
@@ -128,8 +140,10 @@ EngineMonitor engineMonitor = EngineMonitor(DEVICE_ADDRESS,
   &devInfo,
   &productInfomation, 
   &configInfo, 
-  &txPGN[0], 
+  &txPGN[0],
+  SNMEA200_DEFAULT_TX_PGN_LEN+5,
   &rxPGN[0],
+  SNMEA200_DEFAULT_RX_PGN_LEN+2,
   SNMEA_SPI_CS_PIN);
 
 #ifndef INSPECT_FLASH_USAGE
@@ -343,7 +357,7 @@ void showStatus() {
   Serial.print(F("Stored Events:"));
   Serial.println(sensors.localStorage.countEvents());
   for (int i = 0; i < 30; ++i) {
-    uint8_t eventId = sensors.localStorage.nextEvent(&lastEvent);
+    uint8_t eventId = sensors.localStorage.nextEvent(lastEvent);
     if ( eventId == EVENTS_NO_EVENT) {
       break;
     }
@@ -493,38 +507,35 @@ void checkCommand() {
 }
 
 
-#define FN_DUMP_EVENTS 11
-#define FN_DUMP_EVENTS_RESP 12
-#define FN_CLEAR_EVENTS 13
-#define FN_CLEAR_EVENTS_RESP 14
 
 
 void messageHandler(MessageHeader *requestMessageHeader, byte * buffer, int len) {
-  if ( requestMessageHeader->pgn == 65305L) { // single packet pro[prietary]
+  if ( requestMessageHeader->pgn == ENGINE_PROPRIETARY_PGN) { // single packet pro[prietary]
 
     uint16_t id = (((unsigned long )buffer[2])<<16)|(((unsigned long )buffer[1])<<8)|(buffer[0]);
-    if ( id == (2046 & 0x8000) ) { // matches us 2046 + marine industry
-      uint8_t function = buffer[3];
+    if ( id == ENGINE_PROPRIETARY_CODE ) { // matches us 2046 + marine industry
+      uint8_t function = buffer[2];
       if ( function == FN_DUMP_EVENTS) { // a function we recognise, dump the stored events
         // requested error history
         uint8_t nevents = sensors.localStorage.countEvents();
-        MessageHeader messageHeader(130817L, 6, engineMonitor.getAddress(), requestMessageHeader->source);
+        MessageHeader messageHeader(ENGINE_PROPRIETARY_FP_PGN, 6, engineMonitor.getAddress(), requestMessageHeader->source);
         engineMonitor.startFastPacket(&messageHeader, 2+2+nevents*4);
-        engineMonitor.output2ByteUInt(id);
+        engineMonitor.output2ByteUInt(ENGINE_PROPRIETARY_CODE);
         engineMonitor.outputByte(FN_DUMP_EVENTS_RESP);
         engineMonitor.outputByte(nevents);
         uint32_t lastEvent = 0;
         for(int i = 0; i < nevents; i++) {
-          uint8_t eventId = sensors.localStorage.nextEvent(&lastEvent);
+          uint8_t eventId = sensors.localStorage.nextEvent(lastEvent);
           engineMonitor.outputByte(eventId);
-          engineMonitor.output3ByteUDouble(0.004166666667*(double)(lastEvent&0xFFFFFF), 1.0);
+          double h = 0.004166666667*lastEvent;
+          engineMonitor.output3ByteUDouble(h, 0.001);
         }
         engineMonitor.finishFastPacket();
       } else if ( function == FN_CLEAR_EVENTS) { // clear stored events
         sensors.localStorage.clearEvents();
-        MessageHeader messageHeader(65305L, 6, engineMonitor.getAddress(), requestMessageHeader->source);
+        MessageHeader messageHeader(ENGINE_PROPRIETARY_PGN, 6, engineMonitor.getAddress(), requestMessageHeader->source);
         engineMonitor.startPacket(&messageHeader);
-        engineMonitor.output2ByteUInt(id);
+        engineMonitor.output2ByteUInt(ENGINE_PROPRIETARY_CODE);
         engineMonitor.outputByte(FN_CLEAR_EVENTS_RESP);
         engineMonitor.finishPacket();
       } 
@@ -544,7 +555,11 @@ void setup() {
   setupLed();
   engineMonitor.setMessageHandler(messageHandler);
   Serial.println(F("Opening CAN"));
+#ifdef CANCONTROLLER_SPEED_8MHZ
+  while (!engineMonitor.open(MCP_8MHz) ) {
+#else
   while (!engineMonitor.open(MCP_16MHz) ) {
+#endif
     Serial.println(F("CAN Failed"));
     delay(5000);
     blinkLed(2);

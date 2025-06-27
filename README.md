@@ -163,11 +163,11 @@ Stadard  Packet proprietary, 8 bytes
 ## Function 12
 
 
-| Field   | Length  | Value         | Description                            | 
-|---------|---------|---------------|----------------------------------------|
-| 4       | 1 byte  | uint8_t       | Number of events                       |
-| 5+(n*4) | 1 byte  | uint8_t       | Event ID                               |
-| 6+(n*4) | 3 bytes | 3Byte UDouble | Engine Hours of event (15s resolution) |
+| Field   | Length  | Value               | Description                            | 
+|---------|---------|---------------------|----------------------------------------|
+| 4       | 1 byte  | uint8_t             | Number of events                       |
+| 5+(n*4) | 1 byte  | uint8_t             | Event ID                               |
+| 6+(n*4) | 3 bytes | 3Byte UDouble 0.001 | Engine Hours of event (15s resolution) |
 
 
 

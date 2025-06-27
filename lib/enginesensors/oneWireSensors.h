@@ -7,8 +7,8 @@
 
 class OneWireSensors {
     public:
-      OneWireSensors(OneWire * oneWire) {
-        tempSensors.setOneWire(oneWire);
+      OneWireSensors(OneWire &oneWire) {
+        tempSensors.setOneWire(&oneWire);
       }
       void begin();
       uint8_t getMaxActiveDevice();

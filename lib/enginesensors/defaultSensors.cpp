@@ -184,7 +184,6 @@ void EngineSensors::readEngineRPM(bool outoutDebug) {
     Serial.print(F(" RPM:"));
     Serial.println(round(engineRPM));
   }
-  return engineRPM;
 }
 #endif
 

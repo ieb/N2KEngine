@@ -166,7 +166,7 @@ void LocalStorage::saveEvent(uint8_t eventId) {
  * The last event will become 0xffffff when there are no more events availabl
  * Should be called with lastEvent set to 0x00 to start with.
  */
-uint8_t LocalStorage::nextEvent(uint32_t *lastEvent) {
+uint8_t LocalStorage::nextEvent(uint32_t &lastEvent) {
   // find the next event, updating lastEvent with the new event
   uint8_t eventId = EVENTS_NO_EVENT;
   uint32_t minEventTime = 0xffffff;
@@ -178,13 +178,13 @@ uint8_t LocalStorage::nextEvent(uint32_t *lastEvent) {
       eventTime = eventTime | EEPROM.read(i+1);
       eventTime = eventTime<<8;
       eventTime = eventTime | EEPROM.read(i); 
-      if ( eventTime > *lastEvent && eventTime < minEventTime) {
+      if ( eventTime > lastEvent && eventTime < minEventTime) {
         minEventTime = eventTime;
         eventId = e;
       }     
     }
   }
-  *lastEvent = minEventTime;
+  lastEvent = minEventTime;
   return eventId;
 }
 
