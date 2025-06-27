@@ -170,7 +170,15 @@ Stadard  Packet proprietary, 8 bytes
 | 6+(n*4) | 3 bytes | 3Byte UDouble 0.001 | Engine Hours of event (15s resolution) |
 
 
-
+| Event ID | Meaning |
+|----------|---------|
+| 0        | Current engine hours, no event |
+| 1        | Engine Stop |
+| 2        | Low Oil Pressure |
+| 3        | High Coolant Temperature |
+| 4        | High Exhaust Temperature |
+| 5        | High Alternator Temperature |
+| 6        | High Engine Room Temperature |
 
 # Todo
 

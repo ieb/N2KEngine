@@ -89,7 +89,7 @@
 
 
 
-#define EVENTS_NO_EVENT 0
+#define EVENTS_NO_EVENT 0  // also represents current engine hours
 #define EVENT_ENGINE_STOP 1
 #define EVENT_LOW_OIL_PRES 2
 #define EVENT_HIGH_COOLANT 3

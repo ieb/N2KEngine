@@ -519,15 +519,18 @@ void messageHandler(MessageHeader *requestMessageHeader, byte * buffer, int len)
         // requested error history
         uint8_t nevents = sensors.localStorage.countEvents();
         MessageHeader messageHeader(ENGINE_PROPRIETARY_FP_PGN, 6, engineMonitor.getAddress(), requestMessageHeader->source);
-        engineMonitor.startFastPacket(&messageHeader, 2+2+nevents*4);
+        engineMonitor.startFastPacket(&messageHeader, 2+2+4+nevents*4);
         engineMonitor.output2ByteUInt(ENGINE_PROPRIETARY_CODE);
         engineMonitor.outputByte(FN_DUMP_EVENTS_RESP);
         engineMonitor.outputByte(nevents);
+        engineMonitor.outputByte(0);
+        double h = 0.004166666667*sensors.localStorage.engineHoursPeriods;
+        engineMonitor.output3ByteUDouble(h, 0.001);
         uint32_t lastEvent = 0;
         for(int i = 0; i < nevents; i++) {
           uint8_t eventId = sensors.localStorage.nextEvent(lastEvent);
           engineMonitor.outputByte(eventId);
-          double h = 0.004166666667*lastEvent;
+          h = 0.004166666667*lastEvent;
           engineMonitor.output3ByteUDouble(h, 0.001);
         }
         engineMonitor.finishFastPacket();
