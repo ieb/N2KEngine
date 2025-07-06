@@ -214,7 +214,6 @@ uint8_t OneWire::reset(void)
 	noInterrupts();
 	DIRECT_MODE_INPUT(reg, mask);	// allow it to float
 	delayMicroseconds(70);
-    r = !digitalReadFast(ONE_WIRE_PIN);
 	r = !DIRECT_READ(reg, mask);
 	interrupts();
 	delayMicroseconds(410);
