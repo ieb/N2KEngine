@@ -38,7 +38,7 @@
 
 
 #define PIN_FLYWHEEL PIN_PC2
-#define PIN_ONE_WIRE PIN_PC1 
+#define PIN_ONE_WIRE ONE_WIRE_PIN 
 
 #define SNMEA_SPI_M0SI PIN_PA1 // Default pin
 #define SNMEA_SPI_MISO PIN_PA2 // Default Pin
@@ -147,8 +147,8 @@ EngineMonitor engineMonitor = EngineMonitor(DEVICE_ADDRESS,
   SNMEA_SPI_CS_PIN);
 
 #ifndef INSPECT_FLASH_USAGE
-OneWire oneWire(PIN_ONE_WIRE);
-OneWireSensors oneWireSensor(&oneWire);
+OneWire oneWire;
+OneWireSensors oneWireSensor(oneWire);
 #endif
 
 #ifdef LED_PIN
@@ -576,7 +576,10 @@ void setup() {
   }
 
 #ifndef INSPECT_FLASH_USAGE
-  Serial.println(F("Starting one wire"));
+  Serial.print(F("Starting one wire on:"));
+  Serial.println(PIN_ONE_WIRE);
+  oneWire.begin();
+  Serial.println(F("Sarting sensor"));
   oneWireSensor.begin();
 #endif
   blinkLed(4);

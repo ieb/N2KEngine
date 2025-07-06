@@ -218,3 +218,14 @@ not relevant.. eg when sailing.
 
 
 
+# New Board check list
+
+* Oil sensor with pot
+* NTCs, set Vdd then 10K == 25C, 22K == 8C, Check thermstor against room temp and body temp.
+* Check Fuel 190R == full 0R == empty, linear, 120R == 120/190 = 63%  47/190 == 24
+* Check AltV by connecting to suppy V
+* Check Coolant, Supply -> 1K top. 22R == 120C, 120R == 60+10*(134-120)/(134-97) = 63
+* Check RPM with a 1KHz signal
+* Checl oneWire
+* Check CAN and engine events are responding.
+
