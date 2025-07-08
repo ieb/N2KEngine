@@ -522,7 +522,7 @@ void messageHandler(MessageHeader *requestMessageHeader, byte * buffer, int len)
         engineMonitor.startFastPacket(&messageHeader, 2+2+4+nevents*4);
         engineMonitor.output2ByteUInt(ENGINE_PROPRIETARY_CODE);
         engineMonitor.outputByte(FN_DUMP_EVENTS_RESP);
-        engineMonitor.outputByte(nevents);
+        engineMonitor.outputByte(nevents+1);
         engineMonitor.outputByte(0);
         double h = 0.004166666667*sensors.localStorage.engineHoursPeriods;
         engineMonitor.output3ByteUDouble(h, 0.001);

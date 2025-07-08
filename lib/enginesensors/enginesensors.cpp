@@ -12,6 +12,8 @@
 #define ADC_RESOLUTION_SCALE 1
 #define RESOLUTION_BITS 4096
 
+#define STOP_SOLENOID_PIN PIN_PC0
+
 #else
 
 #define READ_ADC(x) analogRead((x))
@@ -244,7 +246,31 @@ void EngineSensors::read(bool outputDebug) {
     readEngineRPM(outputDebug);
     updateEngineStatus();
   }
+  checkStop();
   saveEngineHours();
+}
+
+void EngineSensors::checkStop() {
+  unsigned long now = millis();
+  if ( now-lastCheckStop > 100) {
+    lastCheckStop = now;
+    pinMode(STOP_SOLENOID_PIN, INPUT);
+    int16_t adcReading =  READ_ADC(STOP_SOLENOID_PIN);
+    if (adcReading > 3500) {
+      if ( !engineStopping ) {
+        Serial.print(F("Stopping "));
+        Serial.println(millis()-now);
+        SET_BIT(status2, ENGINE_STATUS2_ENGINE_SUTTING_DOWN);
+        engineStopping = true;
+      }
+    } else {
+      if ( engineStopping ) {
+        CLEAR_BIT(status2, ENGINE_STATUS2_ENGINE_SUTTING_DOWN);
+        engineStopping = false;
+      }
+    }
+    pinMode(STOP_SOLENOID_PIN, OUTPUT);
+  }
 }
 
 void EngineSensors::setStoredVddVoltage(double measuredVddVoltage) {
@@ -282,6 +308,7 @@ void EngineSensors::updateEngineStatus() {
     if ( engineRPM < ENGINE_SHUTDOWN_RPM ) {
       engineRunning = false;
       canEmitAlarms = false;
+      engineStopping = false;
       Serial.print(F("EngineStop"));
       SET_BIT(status2, ENGINE_STATUS2_ENGINE_SUTTING_DOWN);
     } else if ( !canEmitAlarms && now-engineStarted > ENGINE_START_GRACE_PERIOD ) {
@@ -296,6 +323,7 @@ void EngineSensors::updateEngineStatus() {
     if ( engineRPM > 0 ) {
       canEmitAlarms = false;
       engineRunning = true;
+      engineStopping = false;
       engineStarted = now;
       lastEngineHoursTick = now;
       Serial.println(F("EngineStartup...."));
@@ -455,7 +483,7 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
     if ( oilPressureReading < PSIV_POWEROFF ) {
       // disconnected or not powered up
       CLEAR_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES);
-      if ( engineRPM > MIN_ENGINE_RUNNING_RPM ) {
+      if ( engineRPM > MIN_ENGINE_RUNNING_RPM && !engineStopping ) {
         SET_BIT(status2, ENGINE_STATUS2_ENGINE_COMM_ERROR);
       } else {
         CLEAR_BIT(status2, ENGINE_STATUS2_ENGINE_COMM_ERROR);
@@ -468,7 +496,7 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
     if ( oilPressureReading < 0 ) {
       oilPressureReading = 0;
     }
-    if (oilPressureReading < MIN_OIL_PRESSURE && engineRPM > MIN_ENGINE_RUNNING_RPM ) { // 10psi
+    if (oilPressureReading < MIN_OIL_PRESSURE && engineRPM > MIN_ENGINE_RUNNING_RPM && !engineStopping) { // 10psi
       if ( (status1 & ENGINE_STATUS1_LOW_OIL_PRES) == 0) {
         localStorage.saveEvent(EVENT_LOW_OIL_PRES);
       }
@@ -593,13 +621,13 @@ double EngineSensors::getVoltage(uint8_t adc, bool outputDebug) {
     Serial.print(F(" V:"));Serial.println(voltage);    
   }
   if ( adc == adcAlternatorVoltage ) {
-    if ( voltage < LOW_ALTERNATOR_VOLTAGE && engineRPM > MIN_ENGINE_RUNNING_RPM ) {
+    if ( voltage < LOW_ALTERNATOR_VOLTAGE && engineRPM > MIN_ENGINE_RUNNING_RPM  && !engineStopping ) {
       SET_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
     } else {
       CLEAR_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
     }
   } else if ( adc == adcEngineBattery) {
-    if ( voltage < LOW_BATTERY_VOLTAGE && engineRPM > MIN_ENGINE_RUNNING_RPM) {
+    if ( voltage < LOW_BATTERY_VOLTAGE && engineRPM > MIN_ENGINE_RUNNING_RPM && !engineStopping) {
       SET_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);
     } else {
       CLEAR_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);

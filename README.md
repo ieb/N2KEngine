@@ -208,6 +208,9 @@ Stadard  Packet proprietary, 8 bytes
 * [x] Implement event storage
 * [x] Implement PGN proprietary messages to query engine events.
 * [x] Update schematic to improve ADC stability when charging main LiFePO4s
+* [x] Fix OneWire on Attiny3226 (see lib/vportonewire)
+* [x] Fix event streaming to contain the right number of events including current hours.
+* [x] Read stop button, on PC0. This will go to 12V when the solenois is powered.
 
 # Could do... but probably will not
 
@@ -226,6 +229,6 @@ not relevant.. eg when sailing.
 * Check AltV by connecting to suppy V
 * Check Coolant, Supply -> 1K top. 22R == 120C, 120R == 60+10*(134-120)/(134-97) = 63
 * Check RPM with a 1KHz signal
-* Checl oneWire
-* Check CAN and engine events are responding.
+* Check oneWire
+* Check CAN and engine events are responding, verifies can read and write.
 

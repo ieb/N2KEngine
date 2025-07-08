@@ -173,6 +173,8 @@ class EngineSensors {
         void loadEngineHours();
         void writeEnginHours();
         void updateEngineStatus();
+        void checkStop();
+
 
         int16_t interpolate(
             int16_t reading, 
@@ -193,6 +195,7 @@ class EngineSensors {
         unsigned long flywheelReadPeriod = DEFAULT_FLYWHEEL_READ_PERIOD;
         double engineRPM = 0;
         bool engineRunning = false;
+        bool engineStopping = false;
         uint16_t status1 = 0;
         uint16_t status2 = 0;
         bool fakeEngineRunning = false;
@@ -213,6 +216,7 @@ class EngineSensors {
         bool eepromWritten = false;
         bool canEmitAlarms = false;
         unsigned long lastFlywheelReadTime = 0;
+        unsigned long lastCheckStop = 0;
         unsigned long lastEngineHoursTick = 0; 
         unsigned long engineStarted = 0;
 };
