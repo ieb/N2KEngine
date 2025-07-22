@@ -18,11 +18,13 @@
 // These alarms are not dependent on engine speed.
 #define MAX_EXHAUST_TEMP 800
 #define CLEAR_EXHAUST_TEMP 500
-#define MAX_ALTERNATOR_TEMP 1000
+#define MAX_ALTERNATOR_TEMP 1100
 #define CLEAR_ALTERLATOR_TEMP 500
 #define MAX_ENGINE_ROOM_TEMP 700
 #define CLEAR_ENGINE_ROOM_TEMP 400
 #define MAX_COOLANT_TEMP 970
+// The coolant must be over temp for 15s for
+#define ENGINE_OVERTEMP_WINDOW 15000
 
 // speed below which the engine is not running 
 // below this alarms that depend on engine speed are not active
@@ -32,7 +34,7 @@
 
 
 // alarm levels dependent on engine speed.
-#define LOW_ALTERNATOR_VOLTAGE 12.8
+#define LOW_ALTERNATOR_VOLTAGE 12.2
 #define LOW_BATTERY_VOLTAGE 11.8
 #define MIN_OIL_PRESSURE 68940.0  // 10psi
 
@@ -193,6 +195,7 @@ class EngineSensors {
         uint8_t adcAlternatorNTC2;
         uint8_t adcEngineRoomNTC3;
         unsigned long flywheelReadPeriod = DEFAULT_FLYWHEEL_READ_PERIOD;
+
         double engineRPM = 0;
         bool engineRunning = false;
         bool engineStopping = false;
@@ -219,6 +222,7 @@ class EngineSensors {
         unsigned long lastCheckStop = 0;
         unsigned long lastEngineHoursTick = 0; 
         unsigned long engineStarted = 0;
+        unsigned long coolantOverTempStart = 0;
 };
 
 #endif

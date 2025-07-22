@@ -84,6 +84,8 @@ Other alarms are not set at this time.
 
 Use UDPI. I use the old, slow and slightly buggy jtag2udpi programmer loaded onto an Uno. I use https://github.com/ieb/jtag2updi forked just in case. After programming the Uno needs a 10uF cap between reset and ground to prevent a reset on the Uno when programming starts.  The UDPI output is on Digital Pin 6 and connects via a 4K7 Resistor to the UDPI pin on the Attiny3226. The target board should be powered separately, and the serial monitor can remain attached while programming. Do not power the board using both a serial converter and the 12v power supply as this will cause the serial port to draw too much USB current and be shutdown. Programing setup is in platformio.ini. Before programming a fresh chip, set the fuses to set the CPU Frequency.
 
+Fresh boards also need to go through a runing process , see tuning3226/
+
 Obviously edit platform.ini with the correct serial ports for upload and monitoring.
 
     pio run -e attiny3226 -t fuses
@@ -211,6 +213,7 @@ Stadard  Packet proprietary, 8 bytes
 * [x] Fix OneWire on Attiny3226 (see lib/vportonewire)
 * [x] Fix event streaming to contain the right number of events including current hours.
 * [x] Read stop button, on PC0. This will go to 12V when the solenois is powered.
+* [x] Lowered alternator low voltage alarm to 12.2v and added window for overheat to combat high noise levels on the coolant sensor.
 
 # Could do... but probably will not
 

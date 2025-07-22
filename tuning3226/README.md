@@ -16,7 +16,7 @@ upload tuningSource to a Uno which will produce a 500Hz square wave on pin 9. Th
     cd tuningSource
     pio run -e uno -t upload
 
-Connect pin 999 to PB1 (Oil pressure signal) on the board.
+Connect Uno pin 9 to PB1 (Oil pressure signal) on the board.
 
 Upload megaTinyTuner and monitor the serial line to ensure check the process completes.
 

@@ -563,14 +563,23 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
     }
 
     // 98C, may want to make this a setting ?
-    if ( coolantTemperature > MAX_COOLANT_TEMP) {
-      if ( (status1 & ENGINE_STATUS1_LOW_OIL_PRES) == 0) {
-        localStorage.saveEvent(EVENT_HIGH_COOLANT);
-      }
+    // the coolant temp has to be measured over temp for > 15s
 
-      SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE);
-      SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED);
+    if ( coolantTemperature > MAX_COOLANT_TEMP) {
+      unsigned long now = millis();
+      if ( coolantOverTempStart == 0 ) {
+        coolantOverTempStart = now;
+      }
+      if ( (now - coolantOverTempStart) > ENGINE_OVERTEMP_WINDOW ) {
+        if ( (status1 & ENGINE_STATUS1_OVERTEMP) == 0) {
+          localStorage.saveEvent(EVENT_HIGH_COOLANT);
+        }
+
+        SET_BIT(status1, ENGINE_STATUS1_OVERTEMP | ENGINE_STATUS1_CHECK_ENGINE);
+        SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED);        
+      }
     } else {
+      coolantOverTempStart = 0;
       CLEAR_BIT(status1, ENGINE_STATUS1_OVERTEMP);
     }
     return (0.1*coolantTemperature)+273.15; 
