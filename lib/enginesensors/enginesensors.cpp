@@ -480,12 +480,17 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
       Serial.println(F(" pa:"));Serial.print(oilPressureReading);      
     }
     
+
+    // Set oil pressure alarms.
     if ( oilPressureReading < PSIV_POWEROFF ) {
       // disconnected or not powered up
       CLEAR_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES);
       if ( engineRPM > MIN_ENGINE_RUNNING_RPM && !engineStopping ) {
-        SET_BIT(status2, ENGINE_STATUS2_ENGINE_COMM_ERROR);
+        if (delayedTrigger(lowOilPressureStart, LOW_OIL_PRESSURE_WINDOW)) {
+          SET_BIT(status2, ENGINE_STATUS2_ENGINE_COMM_ERROR);
+        }
       } else {
+        lowOilPressureStart = 0;
         CLEAR_BIT(status2, ENGINE_STATUS2_ENGINE_COMM_ERROR);
       }
       return SNMEA2000::n2kDoubleNA;
@@ -497,12 +502,15 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
       oilPressureReading = 0;
     }
     if (oilPressureReading < MIN_OIL_PRESSURE && engineRPM > MIN_ENGINE_RUNNING_RPM && !engineStopping) { // 10psi
-      if ( (status1 & ENGINE_STATUS1_LOW_OIL_PRES) == 0) {
-        localStorage.saveEvent(EVENT_LOW_OIL_PRES);
+      if (delayedTrigger(lowOilPressureStart, LOW_OIL_PRESSURE_WINDOW)) {
+        if ( (status1 & ENGINE_STATUS1_LOW_OIL_PRES) == 0) {
+          localStorage.saveEvent(EVENT_LOW_OIL_PRES);
+        }
+        SET_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES | ENGINE_STATUS1_CHECK_ENGINE);
+        SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED );
       }
-      SET_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES | ENGINE_STATUS1_CHECK_ENGINE);
-      SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED );
     } else {
+      lowOilPressureStart = 0;
       CLEAR_BIT(status1, ENGINE_STATUS1_LOW_OIL_PRES);
     }
     return oilPressureReading;
@@ -566,11 +574,7 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
     // the coolant temp has to be measured over temp for > 15s
 
     if ( coolantTemperature > MAX_COOLANT_TEMP) {
-      unsigned long now = millis();
-      if ( coolantOverTempStart == 0 ) {
-        coolantOverTempStart = now;
-      }
-      if ( (now - coolantOverTempStart) > ENGINE_OVERTEMP_WINDOW ) {
+      if (delayedTrigger(coolantOverTempStart, ENGINE_OVERTEMP_WINDOW)) {
         if ( (status1 & ENGINE_STATUS1_OVERTEMP) == 0) {
           localStorage.saveEvent(EVENT_HIGH_COOLANT);
         }
@@ -584,6 +588,14 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
     }
     return (0.1*coolantTemperature)+273.15; 
 
+}
+
+bool EngineSensors::delayedTrigger(unsigned long &start, unsigned long window) {
+  if (start == 0) {
+    start = millis();
+    return false;    
+  }
+  return ((millis() - start) > window);  
 }
 
 void EngineSensors::dumpADC(uint8_t adc) { 
@@ -631,14 +643,20 @@ double EngineSensors::getVoltage(uint8_t adc, bool outputDebug) {
   }
   if ( adc == adcAlternatorVoltage ) {
     if ( voltage < LOW_ALTERNATOR_VOLTAGE && engineRPM > MIN_ENGINE_RUNNING_RPM  && !engineStopping ) {
-      SET_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
+      if (delayedTrigger(lowAlternatorVoltageStart, LOW_ALTERNATOR_VOLTAGE_WINDOW)) {
+        SET_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
+      }
     } else {
+      lowAlternatorVoltageStart = 0;
       CLEAR_BIT(status1, ENGINE_STATUS1_CHARGE_INDICATOR);
     }
   } else if ( adc == adcEngineBattery) {
     if ( voltage < LOW_BATTERY_VOLTAGE && engineRPM > MIN_ENGINE_RUNNING_RPM && !engineStopping) {
-      SET_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);
+      if (delayedTrigger(lowEngineBatteryVStart, LOW_BATTERY_VOLTAGE_WINDOW)) {
+        SET_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);
+      }
     } else {
+      lowEngineBatteryVStart = 0;
       CLEAR_BIT(status1, ENGINE_STATUS1_LOW_SYSTEM_VOLTAGE);
     }
   }

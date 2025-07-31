@@ -25,12 +25,18 @@
 #define MAX_COOLANT_TEMP 970
 // The coolant must be over temp for 15s for
 #define ENGINE_OVERTEMP_WINDOW 15000
+// Volrages and pressure must be low for > 5s to trigger an alarm.
+#define LOW_ALTERNATOR_VOLTAGE_WINDOW 5000
+#define LOW_BATTERY_VOLTAGE_WINDOW 5000
+#define LOW_OIL_PRESSURE_WINDOW 5000
+
 
 // speed below which the engine is not running 
 // below this alarms that depend on engine speed are not active
-#define MIN_ENGINE_RUNNING_RPM 700
+// idle is 830 RPM
+#define MIN_ENGINE_RUNNING_RPM 800
 // below this the engine is shutting down
-#define ENGINE_SHUTDOWN_RPM 200
+#define ENGINE_SHUTDOWN_RPM 500
 
 
 // alarm levels dependent on engine speed.
@@ -176,6 +182,7 @@ class EngineSensors {
         void writeEnginHours();
         void updateEngineStatus();
         void checkStop();
+        bool delayedTrigger(unsigned long &start, unsigned long window);
 
 
         int16_t interpolate(
@@ -222,7 +229,12 @@ class EngineSensors {
         unsigned long lastCheckStop = 0;
         unsigned long lastEngineHoursTick = 0; 
         unsigned long engineStarted = 0;
+        // these could be converted to uint8 by measuring 5s periods which would give
+        // a maximum duration of about 21m, saving 12 bytes of stack, probably not worth it.
         unsigned long coolantOverTempStart = 0;
+        unsigned long lowAlternatorVoltageStart = 0;
+        unsigned long lowEngineBatteryVStart = 0;
+        unsigned long lowOilPressureStart = 0;
 };
 
 #endif

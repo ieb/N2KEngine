@@ -214,6 +214,7 @@ Stadard  Packet proprietary, 8 bytes
 * [x] Fix event streaming to contain the right number of events including current hours.
 * [x] Read stop button, on PC0. This will go to 12V when the solenois is powered.
 * [x] Lowered alternator low voltage alarm to 12.2v and added window for overheat to combat high noise levels on the coolant sensor.
+* [x] Added window period for all alarms to avoid 1 reading triggering alarm condition, set a 5s. 
 
 # Could do... but probably will not
 
