@@ -218,6 +218,10 @@ void sendEngineData() {
       double alternatorVoltage = sensors.getVoltage(ADC_ALTERNATOR_VOLTAGE);
       double oilPressure = sensors.getOilPressure(ADC_OIL_SENSOR);
       double alternatorTemperature = sensors.getTemperatureK(ADC_ALTERNATOR_NTC2);
+      double exhaustTemperature = sensors.getTemperatureK(ADC_EXHAUST_NTC1);
+
+
+
       uint16_t status1 = sensors.getEngineStatus1();
       uint16_t status2 = sensors.getEngineStatus2();
       if (status1 != 0) {
@@ -285,11 +289,19 @@ void sendTemperatures() {
     lastTempUpdate = now;    
       toggleLed();
     // this may need adjusting depending on what the instruments can display
-    engineMonitor.sendTemperatureMessage(sid, 0, 14, sensors.getTemperatureK(ADC_EXHAUST_NTC1));
+    double exhaustTemperature = sensors.getTemperatureK(ADC_EXHAUST_NTC1);
+    engineMonitor.sendTemperatureMessage(sid, 0, 14, exhaustTemperature);
+    // abusing transmission information so exhaust temp can be shown on an i70 display
+    engineMonitor.sendTransmissionDynamicParamMessage(ENGINE_INSTANCE,
+        0x03, // invalid transmssionGear,
+        -1E9, //transmssionOilPressure,
+        exhaustTemperature,
+        0x00); // transmissionStatus
     engineMonitor.sendTemperatureMessage(sid, 0, 3, sensors.getTemperatureK(ADC_ENGINEROOM_NTC3));
     // custom temperatures
     // temperature source can be 0-255, 0-15 are defined.
     engineMonitor.sendTemperatureMessage(sid, 0, 30, sensors.getTemperatureK(ADC_ALTERNATOR_NTC2));
+
 #ifndef INSPECT_FLASH_USAGE
     uint8_t maxActiveDevices = oneWireSensor.getMaxActiveDevice();
     for (int i = 0; i < maxActiveDevices; i++) {

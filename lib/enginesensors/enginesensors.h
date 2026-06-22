@@ -13,11 +13,10 @@
 // while it spins up.
 #define  ENGINE_START_GRACE_PERIOD 15000
 
-
 // Alarm temperatures in 0.1C
 // These alarms are not dependent on engine speed.
-#define MAX_EXHAUST_TEMP 800
-#define CLEAR_EXHAUST_TEMP 500
+#define MAX_EXHAUST_TEMP 450
+#define CLEAR_EXHAUST_TEMP 400
 #define MAX_ALTERNATOR_TEMP 1100
 #define CLEAR_ALTERLATOR_TEMP 500
 #define MAX_ENGINE_ROOM_TEMP 700

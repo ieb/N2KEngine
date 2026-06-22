@@ -121,7 +121,7 @@ const int16_t coolantTable[] PROGMEM= {
     277,
     212
 };
-#define COOLANT_TABLE_LENGTH 13
+#define COOLANT_TABLE_LENGTH 12
 // in 0.1C as interpolation uses ints.
 #define COOLANT_MIN_TEMPERATURE 100
 #define COOLANT_MAX_TEMPERATURE 1200
@@ -216,7 +216,7 @@ const int16_t tcurveNMF5210K[] PROGMEM= {
 #define NMF5210K_MIN -200
 #define NMF5210K_MAX 1450
 #define NMF5210K_STEP 50
-#define NMF5210K_LENGTH 33
+#define NMF5210K_LENGTH 34
 // ADC value that indicates a NTC is not connected.
 #define DISCONNECTED_NTC 4090
 
@@ -519,29 +519,34 @@ double EngineSensors::getOilPressure(uint8_t adc, bool outputDebug) {
 
 
 double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t batteryAdc, bool outputDebug) {
-  // probably need a long to do this calc
-    // need 32 bits, 1024*1024 = 1M
     if (outputDebug) {
       Serial.print(F("Coolant:"));
     }
-    // TODO 
 
-    // powered by 12v so need to read 12v and scale
-    int16_t coolantSupply =  READ_ADC(batteryAdc);
-    if ( CHECK_ADC((coolantSupply))) { 
+    // Interleave supply and coolant samples and average. The coolant NTC is
+    // powered from raw 12V, so any ripple on the 12V rail must cancel in the
+    // (coolantReading * COOLANT_SUPPLY_ADC_12V / coolantSupply) scaling. A
+    // single supply+coolant pair samples the rail at two different instants,
+    // so ripple does not cancel — it shows up as ±4-5C noise. Averaging N
+    // interleaved pairs makes both readings see (statistically) the same
+    // rail level, and reduces uncorrelated ADC noise by ~sqrt(N).
+    const uint8_t COOLANT_SAMPLES = 8;
+    int32_t supplySum = 0;
+    int32_t coolantSum = 0;
+    for (uint8_t i = 0; i < COOLANT_SAMPLES; i++) {
+      int16_t s = READ_ADC(batteryAdc);
+      int16_t c = READ_ADC(coolantAdc);
+      if ( CHECK_ADC(s) || CHECK_ADC(c) ) {
         if (outputDebug) {
           Serial.println(F("adc error"));
-        } 
-        return SNMEA2000::n2kDoubleNA; 
-    } 
-
-    int16_t coolantReading =  READ_ADC(coolantAdc);
-    if ( CHECK_ADC((coolantReading))) {
-        if (outputDebug) {
-          Serial.println(F("adc error"));
-        } 
+        }
         return SNMEA2000::n2kDoubleNA;
-    } 
+      }
+      supplySum += s;
+      coolantSum += c;
+    }
+    int16_t coolantSupply = (supplySum + COOLANT_SAMPLES/2) / COOLANT_SAMPLES;
+    int16_t coolantReading = (coolantSum + COOLANT_SAMPLES/2) / COOLANT_SAMPLES;
 
     // scale to 4096 bits if not already scaled.
     coolantReading = coolantReading * ADC_RESOLUTION_SCALE;
@@ -558,7 +563,7 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
     }
     // both will be scaled by VDD errors and so those errors cancel out
     // however any difference in the supply (12v) needs to be takne into account.
-    coolantReading = coolantReading *  ((double)COOLANT_SUPPLY_ADC_12V/(double)coolantSupply);
+    coolantReading = (int16_t)(coolantReading *  ((double)COOLANT_SUPPLY_ADC_12V/(double)coolantSupply) + 0.5);
 
     int16_t coolantTemperature = interpolate(coolantReading,COOLANT_MIN_TEMPERATURE, COOLANT_MAX_TEMPERATURE, COOLANT_STEP, coolantTable, COOLANT_TABLE_LENGTH);
 
@@ -700,7 +705,14 @@ double EngineSensors::getTemperatureK(uint8_t adc, bool outputDebug) {
   }
 
   // temperatures are in 0.1C
-  // 80C
+  // 80C  
+  // Measurements show that normal water flow on the elbow is 37C
+  // Alarms dont get emitted until after the grace period is over 15s.
+  // which should be long enough for the water flow to be established 
+  // and the elbow to cool. The sensor must be mounted on the metal 
+  // water jacket elbow as close to the where the water is being sprayed
+  // into the exhaust flow.
+  // 
   if ( adc == adcExhaustNTC1 ) {
     if ( temperature > MAX_EXHAUST_TEMP) {
       if ( (status1 & ENGINE_STATUS1_WATER_FLOW) == 0) {
@@ -752,12 +764,12 @@ int16_t EngineSensors::interpolate(
       const int16_t *curve, 
       int curveLength
       ) {
-  int16_t cvp = ((int16_t)pgm_read_dword(&curve[0]));
+  int16_t cvp = (int16_t)pgm_read_word(&curve[0]);
   if ( reading > cvp ) {
     return minCurveValue;
   }
   for (int i = 1; i < curveLength; i++) {
-    int16_t cv = ((int16_t)pgm_read_dword(&curve[i]));
+    int16_t cv = (int16_t)pgm_read_word(&curve[i]);
     if ( reading > cv ) {
       return minCurveValue+((i-1)*step)+((cvp-reading)*step)/(cvp-cv);
     }
