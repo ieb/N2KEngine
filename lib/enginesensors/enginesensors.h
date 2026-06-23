@@ -16,7 +16,23 @@
 // Alarm temperatures in 0.1C
 // These alarms are not dependent on engine speed.
 #define MAX_EXHAUST_TEMP 450
-#define CLEAR_EXHAUST_TEMP 400
+#define CLEAR_EXHAUST_TEMP 380
+// Below this exhaust temp the rate-of-rise check is suppressed since the
+// elbow has not reached steady state and warmup transients would false-trigger.
+#define EXHAUST_BASELINE_TEMP 350
+// Rate-of-rise: if exhaust climbs more than this over EXHAUST_RISE_WINDOW the
+// raw water flow has almost certainly failed even if absolute temp is still
+// below MAX_EXHAUST_TEMP. Caught the 21-Jul-2026 incident ~15s earlier than
+// the absolute threshold would have.
+#define EXHAUST_RISE_DELTA 80
+#define EXHAUST_RISE_WINDOW 30000UL
+// Under normal raw water flow the elbow runs ~50C below coolant. If the
+// exhaust elbow temperature gets within this margin of the coolant, raw
+// water flow has collapsed regardless of absolute exhaust temperature.
+#define EXHAUST_COOLANT_MARGIN 300
+// Exhaust over-temp must persist for this long before EMERGENCY_STOP is
+// asserted. WATER_FLOW/CHECK_ENGINE are still set on first sample.
+#define HIGH_EXHAUST_WINDOW 5000
 #define MAX_ALTERNATOR_TEMP 1100
 #define CLEAR_ALTERLATOR_TEMP 500
 #define MAX_ENGINE_ROOM_TEMP 700
@@ -234,6 +250,17 @@ class EngineSensors {
         unsigned long lowAlternatorVoltageStart = 0;
         unsigned long lowEngineBatteryVStart = 0;
         unsigned long lowOilPressureStart = 0;
+        unsigned long highExhaustStart = 0;
+        // Rate-of-rise tracking for the exhaust elbow. exhaustRiseAnchor is the
+        // temperature recorded at exhaustRiseAnchorTime; a delta beyond
+        // EXHAUST_RISE_DELTA inside EXHAUST_RISE_WINDOW indicates raw water flow
+        // collapse before the absolute threshold trips.
+        unsigned long exhaustRiseAnchorTime = 0;
+        int16_t exhaustRiseAnchor = 0;
+        // Cached most-recent coolant temperature in 0.1C. Used by the exhaust
+        // alarm logic for the elbow-vs-coolant convergence check; written by
+        // getCoolantTemperatureK and read by getTemperatureK.
+        int16_t lastCoolantTemperature = INT16_MIN;
 };
 
 #endif

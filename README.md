@@ -59,18 +59,26 @@ Over 77% Flash usag pio inspect no longer works, however removing One wire code 
 
 The status bits in PGN 127489 are set to indicate an alarm condition.
 
+Alarm set levels and alarm clear levels are in enginesensors.h
+
 WHen an alarm condition is set if the check engine, maintenance or emergency stop bits are set, they are not
 cleared when the alarm clears. Generally advisable to stop the engine and check.
 
 Emergency stop will be set when temperatures are too high. Best to stop the engine before damage occurs.
 
-Over Temperature status 1 bit 1 set when over temperature is suspected including coolant (> 90C), exhaust > 80C, alternator > 100C, engine room > 70C. Will also set check engine and engine emergency shutdown alarms.
+Over Temperature status 1 bit 1 set when over temperature is suspected including coolant (> 97C), exhaust > 45C, alternator > 110C, engine room > 70C. Will also set check engine and engine emergency shutdown alarms.
 
 Low oil pressure alarm is set when oil pressure is < 10psi.
 
 If sensors fail then engine comms alarm is set.
 
-Water flow alarm is set when th exhaust temperature > 80C as there is probably no raw water.
+Water flow alarm uses the wet exhaust elbow probe as a proxy for raw water flow. Three independent triggers, all gated on engine running, past the start-up grace period, and not stopping:
+
+* Absolute over-temp: exhaust > 45C. WATER_FLOW and CHECK_ENGINE are set on the first sample; EMERGENCY_STOP is held off until the condition has persisted for 5s so a single noisy ADC sample cannot trip it.
+* Rate-of-rise: exhaust climbs more than 8C in any 30s window once past the 35C baseline. This catches a flow failure before the absolute threshold (the 21-Jul-2026 incident showed a +9C rise in the first 30s while still well below 45C).
+* Convergence on coolant: under normal flow the elbow runs ~50C below coolant; if the gap closes within 30C raw water flow has clearly collapsed regardless of absolute exhaust value. This is ambient- and load-independent.
+
+The alarm clears only once exhaust drops below 38C (widened from 40C) to avoid chatter on a cooling elbow.
 
 Charge indicator alarm is set when the alternator voltage is < 12.8V
 
@@ -123,15 +131,29 @@ Do not attempt to power the board both on the 12v line and through the serial po
 Critical that this chip as a 100nF decoupling capacitor. Without it it will generate pulses from power supply noise with the inputs shorted together. See schematic. LTSpice models don't predict this behavior.
 
 
+
 # Engine Events
 
 Stores upto 29 events in EEPROM, with a 15s resolution and one of upto 255 types.
 All the following PGNS have standard priorietary PGN format + a Function code byte.
 The Manufactore code is 2046 and the Industry is Marine, ie 4.
 
+# PGN Abuse
+
+Since Raymarine instuments display only a asubset of PGNs, some are beeing abused to get critical temperatures avialable on the insturments.
+
+* alternator temperature, critical for LiFePO4 charging, is sent as oil temperature in Dynamic Engine Parameters (PGN 127489)
+* ehxhaust temperature, critical for raw water flow monitoring, is sent as transmission oil temperature in Dynamic Transmiossion Parameters (PGN 127493L)
+
+# Temperature PGN 130312 non standard IDs
+
+* Exhaust temperature is sent as ID 30
+* Additional OneWire Temperature probes are sent as IDs 31-35 where present.
+
+
 ## PGN 65305L
 
-Stadard  Packet proprietary, 8 bytes
+Standard  Packet proprietary, 8 bytes
 
 | Field | Length | Value     | Description            |
 |-----------------------------------------------------|
@@ -215,6 +237,8 @@ Stadard  Packet proprietary, 8 bytes
 * [x] Read stop button, on PC0. This will go to 12V when the solenois is powered.
 * [x] Lowered alternator low voltage alarm to 12.2v and added window for overheat to combat high noise levels on the coolant sensor.
 * [x] Added window period for all alarms to avoid 1 reading triggering alarm condition, set a 5s. 
+* [x] Fixed (hopefully, need to test on engine) noise in in Engine Coolant readings, due to 12v ripple.
+* [ ] Check the divders, which we specked at 100K/47K which could be too large for the ADC capacitance.
 
 # Could do... but probably will not
 
@@ -235,4 +259,20 @@ not relevant.. eg when sailing.
 * Check RPM with a 1KHz signal
 * Check oneWire
 * Check CAN and engine events are responding, verifies can read and write.
+
+
+# Engine overheat data from 21 July 2026.
+
+Had been motoring for about 45m, 2.2K rpm all stable.
+
+* 10:08:45 Coolant 87C, Exhaust 38.4C, Engine Room 57. raw water hose detaches, sudden drop in Engine Room temperature due to water spraying engine bay. Exhaust note changed.
+* 10:09:00 Coolant 90C, Exhaust 40.2, Engine 50C
+* 10:09:15 Coolant 92.7C, Exhaust 47.1, Engine 49.4C
+* 10:09:30 Coolant 95.2C, Exhaust 51.9, Engine 48.6C  <<< Should have alarmed here.
+* 10:09:45 Coolant 97.4C, Exhaust 57.9, Engine 47.3C
+* 10:09:55 Coolant 98.3C, Exhaust 62.6, Engine 47.1C  engine was turned off before overheat.
+
+Exhaust elbow temperature rises rapidly 22C over 1m vs 8C over the same period for the engine coolant temperature, although at the time no raw water alarm sounded as the limit was set at 80C and there was no display showing exhaust temperature.
+
+Exhaust elbow temperature seems to be a strong indicator of water flow once the engine is running at temperature.
 
