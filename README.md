@@ -35,6 +35,12 @@ Setup starting with a new board, this is for 3226 which the preferred board.
 * Install the board
 
 
+## Connection notes
+
+* The GND connection must be made to the engine block (star pattern) to avoid GND voltage differences when the anternator is charging. Do not GND on the battery as that will result in dips in the coolant temperature of 5C or more. The battery voltage will include the GND drop on the charging line.
+
+* The exhaust NCT should be connected to a part of the wet exhaust with good thermal connection to the inside of the exhaust. Do not connect to the elbow on the engine as this could result in false alarms when starting a warm engine. The trigger level is 45C or an 8C every 30s rise. Typically an exaust in UK waters on a D2-40 rests at 34-37C and rises rapidly should raw water fail.
+
 
 ## Changes from original build 4 years ago
 

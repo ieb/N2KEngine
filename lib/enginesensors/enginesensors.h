@@ -194,6 +194,7 @@ class EngineSensors {
         void updateEngineStatus();
         void checkStop();
         bool delayedTrigger(unsigned long &start, unsigned long window);
+        int16_t readAdcSampled(uint8_t adc);
 
 
         int16_t interpolate(

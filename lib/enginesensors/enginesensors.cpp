@@ -627,11 +627,24 @@ void EngineSensors::dumpADC(uint8_t adc) {
   Serial.println(voltage, 5);
 }
 
+int16_t EngineSensors::readAdcSampled(uint8_t adc) {
+  const uint8_t SAMPLES = 8;
+  int32_t adcSum = 0;
+  for (uint8_t i = 0; i < SAMPLES; i++) {
+    int16_t s = READ_ADC(adc);
+    if ( CHECK_ADC(s)) {
+      return s;
+    }
+    adcSum += s;
+  }
+  return (adcSum + SAMPLES/2) / SAMPLES;
+}
 
 
 double EngineSensors::getVoltage(uint8_t adc, bool outputDebug) { 
 
-  int16_t adcReading =  READ_ADC(adc);
+  // voltages can be noisy to sample.
+  int16_t adcReading =  readAdcSampled(adc);
   if ( CHECK_ADC((adcReading))) {
       if (outputDebug) {
         Serial.println(F("adc error"));
