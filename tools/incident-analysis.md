@@ -28,9 +28,25 @@ python3 tools/engine_log.py trace   --peak coolant <files>   # window around pea
 | alternator V / battery V | 13.7–14.5 / 13.5–14.0 |
 
 Confirms the firmware comment that "normal water flow on the elbow is 37C".
-The new alarm constants — 45 C absolute trip, 35 C rise-anchor baseline,
-30 C convergence margin, 8 C rise-in-30 s — are all comfortably outside
-healthy variation.
+The alarm constants — 45 C absolute trip, 35 C rise-anchor baseline,
+8 C rise-in-30 s — are all comfortably outside healthy variation.
+
+## Why no coolant-convergence trigger
+
+An earlier version of the firmware included a coolant-vs-exhaust convergence
+trigger (fire if `coolant - exhaust < 30 C` once coolant > 70 C). It was
+removed after the warm-restart sequence on run 2 of 21 Jun was inspected:
+the silencer (where the exhaust probe is mounted) is thermally isolated from
+the engine block, so on a warm restart the block is at ~85 C while the
+silencer has cooled toward ambient. At 09:30:45 — engine at 1380 rpm, all
+healthy — coolant was 82.0 C and exhaust 51.4 C: gap 30.6 C, **0.5 C from
+tripping the convergence alarm**. Exhaust then fell monotonically for ~5 min
+as raw water cooled the silencer faster than exhaust gas heated it, before
+diverging into the normal ~50 C steady-state gap. Convergence is therefore
+a false-positive risk on every warm restart, while contributing no
+detectable lead time on either captured failure mode (it does not fire at
+all on the sudden-detachment case and is the *last* of the three triggers
+to fire on the slow-degradation case). Removed.
 
 ## Note on dating
 
@@ -66,13 +82,11 @@ When the new alarm logic would trip (replayed against the data):
 |---|---|---|
 | rate-of-rise (8 C / 30 s) | ~10:05:30 (cool 73 C) | **~4 min earlier** |
 | absolute > 45 C | 10:05:54 (cool 80 C) | ~3 min 45 s earlier |
-| convergence (gap < 30 C) | 10:06:09 (cool 79 C) | ~3 min 30 s earlier |
 
 The old code (45 C absolute, no persistence) also tripped at 10:05:54, but
 OVERTEMP was the only bit eventually set in the historical record — and
 that didn't happen until 4 minutes later. **This is the failure mode where
-the new rate-of-rise and convergence triggers add real, measurable
-detection time.**
+the new rate-of-rise trigger adds real, measurable detection time.**
 
 ## Incident B — 2026-06-21, sudden hose detachment
 
@@ -103,33 +117,30 @@ When the new alarm logic would trip:
 |---|---|---|
 | rate-of-rise (8 C / 30 s) | 09:09:15 (+8.7 C since 09:08:45) | tied with abs |
 | absolute > 45 C | 09:09:15 (47.1 C) | tied with rate |
-| convergence (gap < 30 C) | does not fire | gap stays 36–50 C through engine-off |
 
-Rate-of-rise and absolute fire **simultaneously** here — convergence
-adds no detection time for fast catastrophic failures. The value of the
+Rate-of-rise and absolute fire **simultaneously** here. The value of the
 new logic in this incident is that it actually fires (the in-service
 80 C threshold did not), with the absolute + 5 s persistence reaching
 EMERGENCY_STOP at ~09:09:20.
 
 ## Conclusions
 
-1. Healthy baseline data validates the new alarm constants — they sit
+1. Healthy baseline data validates the alarm constants — they sit
    well outside normal-operation variation in both warmed-up cruise and
    warmup transients.
-2. The May incident (slow degradation) is where the new rate-of-rise and
-   convergence triggers add several minutes of detection time over an
-   absolute-only check.
+2. The May incident (slow degradation) is where the rate-of-rise trigger
+   adds several minutes of detection time over an absolute-only check.
 3. The June incident (sudden detachment) is caught at the same instant
-   by absolute and rate-of-rise; convergence is irrelevant for this
-   class of failure. The improvement here is over the original 80 C
-   threshold that was actually in service, which never tripped.
+   by absolute and rate-of-rise. The improvement here is over the
+   original 80 C threshold that was actually in service, which never
+   tripped.
 4. The 5 s EMERGENCY_STOP persistence and engine-running gate are
    defence-in-depth against bad samples and hot-soak / hot-restart false
    positives. Neither incident exhibited those failure modes, but the
    cost of including them is negligible.
-5. The convergence check (gap < 30 C) protects against a third, untested
-   failure class: long-running partial flow degradation in which the
-   elbow stabilises at a non-alarming absolute value. No incident in the
-   captured data exercises this, so it is precautionary; the May data
-   shows the gap response is the strongest single discriminator once
-   the engine is well under load.
+5. A coolant-vs-exhaust convergence trigger was considered and removed:
+   the silencer (where the exhaust probe is mounted) is thermally
+   isolated from the block, so on a warm restart the coolant–exhaust
+   gap shrinks to within ~0.5 C of the trip margin under entirely
+   healthy conditions before re-diverging. See the warm-restart section
+   above.

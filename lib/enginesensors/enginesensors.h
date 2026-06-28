@@ -26,10 +26,6 @@
 // the absolute threshold would have.
 #define EXHAUST_RISE_DELTA 80
 #define EXHAUST_RISE_WINDOW 30000UL
-// Under normal raw water flow the elbow runs ~50C below coolant. If the
-// exhaust elbow temperature gets within this margin of the coolant, raw
-// water flow has collapsed regardless of absolute exhaust temperature.
-#define EXHAUST_COOLANT_MARGIN 300
 // Exhaust over-temp must persist for this long before EMERGENCY_STOP is
 // asserted. WATER_FLOW/CHECK_ENGINE are still set on first sample.
 #define HIGH_EXHAUST_WINDOW 5000
@@ -257,10 +253,6 @@ class EngineSensors {
         // collapse before the absolute threshold trips.
         unsigned long exhaustRiseAnchorTime = 0;
         int16_t exhaustRiseAnchor = 0;
-        // Cached most-recent coolant temperature in 0.1C. Used by the exhaust
-        // alarm logic for the elbow-vs-coolant convergence check; written by
-        // getCoolantTemperatureK and read by getTemperatureK.
-        int16_t lastCoolantTemperature = INT16_MIN;
 };
 
 #endif

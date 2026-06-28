@@ -72,11 +72,12 @@ Low oil pressure alarm is set when oil pressure is < 10psi.
 
 If sensors fail then engine comms alarm is set.
 
-Water flow alarm uses the wet exhaust elbow probe as a proxy for raw water flow. Three independent triggers, all gated on engine running, past the start-up grace period, and not stopping:
+Water flow alarm uses the wet exhaust silencer probe as a proxy for raw water flow. The probe is mounted on the silencer body, which is in direct contact with the wet exhaust but thermally isolated from the engine block and heat exchanger — so silencer temperature reflects exhaust gas vs raw water flow only, and is not biased by block temperature on a warm restart. Two independent triggers, both gated on engine running, past the start-up grace period, and not stopping:
 
 * Absolute over-temp: exhaust > 45C. WATER_FLOW and CHECK_ENGINE are set on the first sample; EMERGENCY_STOP is held off until the condition has persisted for 5s so a single noisy ADC sample cannot trip it.
-* Rate-of-rise: exhaust climbs more than 8C in any 30s window once past the 35C baseline. This catches a flow failure before the absolute threshold (the 21-Jul-2026 incident showed a +9C rise in the first 30s while still well below 45C).
-* Convergence on coolant: under normal flow the elbow runs ~50C below coolant; if the gap closes within 30C raw water flow has clearly collapsed regardless of absolute exhaust value. This is ambient- and load-independent.
+* Rate-of-rise: exhaust climbs more than 8C in any 30s window once past the 35C baseline. This catches a flow failure before the absolute threshold (the 21-Jun-2026 incident showed a +9C rise in the first 30s while still well below 45C).
+
+A coolant-vs-exhaust convergence check was previously included but removed: on a warm restart the silencer takes several minutes to thermalize while coolant is already at operating temperature, producing a coolant–exhaust gap that approaches the trip margin under entirely healthy conditions.
 
 The alarm clears only once exhaust drops below 38C (widened from 40C) to avoid chatter on a cooling elbow.
 

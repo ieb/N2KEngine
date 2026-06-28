@@ -566,7 +566,6 @@ double EngineSensors::getCoolantTemperatureK(uint8_t coolantAdc, uint8_t battery
     coolantReading = (int16_t)(coolantReading *  ((double)COOLANT_SUPPLY_ADC_12V/(double)coolantSupply) + 0.5);
 
     int16_t coolantTemperature = interpolate(coolantReading,COOLANT_MIN_TEMPERATURE, COOLANT_MAX_TEMPERATURE, COOLANT_STEP, coolantTable, COOLANT_TABLE_LENGTH);
-    lastCoolantTemperature = coolantTemperature;
 
     if (outputDebug) {
       Serial.print(F("Coolant Temperature adc:"));
@@ -708,22 +707,24 @@ double EngineSensors::getTemperatureK(uint8_t adc, bool outputDebug) {
   // temperatures are in 0.1C
   // Raw water flow alarm via the wet exhaust elbow probe.
   //
-  // Normal flow at the elbow runs ~37C. Three independent triggers, gated by
-  // engineRunning && canEmitAlarms && !engineStopping so a hot soak after
-  // shutdown or a hot restart cannot raise the alarm:
+  // The probe is mounted on the silencer body, which is in direct contact
+  // with the wet exhaust but thermally isolated from the engine block and
+  // heat exchanger. The silencer is therefore heated by exhaust gas and
+  // cooled by raw water; coolant temperature is not a useful reference
+  // (during a warm restart coolant is at ~85C while the silencer is still
+  // near ambient, so any gap-based check has a wide false-positive surface).
+  //
+  // Two independent triggers, gated by engineRunning && canEmitAlarms &&
+  // !engineStopping so a hot soak after shutdown or a hot restart cannot
+  // raise the alarm:
   //   1. Absolute over-temp: temperature > MAX_EXHAUST_TEMP, must persist
   //      for HIGH_EXHAUST_WINDOW before EMERGENCY_STOP is asserted (a single
   //      noisy ADC sample no longer trips e-stop). WATER_FLOW/CHECK_ENGINE
   //      are still set on first sample.
   //   2. Rate-of-rise: > EXHAUST_RISE_DELTA in EXHAUST_RISE_WINDOW once the
   //      elbow has reached steady state. Catches a flow failure before the
-  //      absolute threshold (the 21-Jul-2026 incident showed +9C in 30s
+  //      absolute threshold (the 21-Jun-2026 incident showed +9C in 30s
   //      while still well below 45C).
-  //   3. Convergence on coolant: under normal flow the elbow runs far below
-  //      coolant; if the gap closes within EXHAUST_COOLANT_MARGIN raw water
-  //      flow has clearly collapsed regardless of absolute exhaust value.
-  // The sensor must be mounted on the metal water jacket elbow as close as
-  // possible to where raw water is sprayed into the exhaust flow.
   if ( adc == adcExhaustNTC1 ) {
     bool running = engineRunning && canEmitAlarms && !engineStopping;
     bool tripped = false;
@@ -772,19 +773,6 @@ double EngineSensors::getTemperatureK(uint8_t adc, bool outputDebug) {
         exhaustRiseAnchorTime = 0;
       }
 
-      // Elbow-vs-coolant convergence: a strong, ambient-independent signal
-      // that flow has collapsed. Only valid once the coolant reading is
-      // available and the engine has warmed enough that coolant is meaningful.
-      if ( lastCoolantTemperature != INT16_MIN
-           && lastCoolantTemperature > EXHAUST_BASELINE_TEMP
-           && (lastCoolantTemperature - temperature) < EXHAUST_COOLANT_MARGIN ) {
-        if ( (status1 & ENGINE_STATUS1_WATER_FLOW) == 0) {
-          localStorage.saveEvent(EVENT_EXHAUST_TEMP);
-        }
-        SET_BIT(status1, ENGINE_STATUS1_WATER_FLOW | ENGINE_STATUS1_CHECK_ENGINE);
-        SET_BIT(status2, ENGINE_STATUS2_MAINTANENCE_NEEDED);
-        tripped = true;
-      }
     } else {
       // Engine not running / in grace / stopping: hold off on all triggers
       // and reset persistence/rate state so a fresh start gets a clean slate.
